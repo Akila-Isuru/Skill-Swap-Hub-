@@ -5,7 +5,10 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class SwapRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,6 +30,3 @@ public class SwapRequest {
     private LocalDateTime createdAt = LocalDateTime.now();
 }
 
-enum RequestStatus {
-    PENDING, ACCEPTED, REJECTED, COMPLETED
-}

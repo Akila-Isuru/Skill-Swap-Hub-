@@ -5,7 +5,10 @@ import lombok.*;
 
 @Entity
 @Table(name = "user_skills")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserSkill {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,6 +28,3 @@ public class UserSkill {
     private String expertiseLevel; // Beginner, Intermediate, Expert
 }
 
-enum SkillType {
-    TEACH, LEARN
-}
