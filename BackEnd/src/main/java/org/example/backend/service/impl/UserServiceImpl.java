@@ -1,8 +1,9 @@
-package org.example.backend.service;
+package org.example.backend.service.impl;
 
 import org.example.backend.dto.UserDTO;
 import org.example.backend.entity.User;
 import org.example.backend.repository.UserRepository;
+import org.example.backend.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
