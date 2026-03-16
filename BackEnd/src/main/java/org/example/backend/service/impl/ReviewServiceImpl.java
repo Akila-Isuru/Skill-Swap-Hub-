@@ -47,4 +47,12 @@ public class ReviewServiceImpl implements ReviewService {
 
         return modelMapper.map(reviews, new TypeToken<List<ReviewDTO>>() {}.getType());
     }
+    @Override
+    public Double getAverageRating(Long userId) {
+        List<Review> reviews = reviewRepository.findByRevieweeId(userId);
+        return reviews.stream()
+                .mapToDouble(Review::getRating)
+                .average()
+                .orElse(0.0);
+    }
 }

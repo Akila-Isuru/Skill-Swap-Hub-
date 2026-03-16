@@ -28,4 +28,8 @@ public class ReviewController {
     public ResponseEntity<APIResponse<List<ReviewDTO>>> getReviews(@PathVariable Long userId) {
         return new ResponseEntity<>(new APIResponse<>(200, "Success", reviewService.getReviewsForUser(userId)), HttpStatus.OK);
     }
+    @GetMapping("/average/{userId}")
+    public ResponseEntity<APIResponse<Double>> getAverage(@PathVariable Long userId) {
+        return new ResponseEntity<>(new APIResponse<>(200, "Success", reviewService.getAverageRating(userId)), HttpStatus.OK);
+    }
 }

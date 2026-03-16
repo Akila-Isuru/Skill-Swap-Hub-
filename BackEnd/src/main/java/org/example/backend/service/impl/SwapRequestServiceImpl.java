@@ -59,8 +59,9 @@ public class SwapRequestServiceImpl implements SwapRequestService {
 
     @Override
     public List<SwapRequestDTO> getOutgoingRequests(Long userId) {
+        // මෙතනදී Repository එකේ අපි කලින් හදපු findBySenderId මෙතඩ් එක පාවිච්චි කරන්න
+        List<SwapRequest> requests = swapRequestRepository.findBySenderId(userId);
 
-        List<SwapRequest> requests = swapRequestRepository.findByReceiverIdAndStatus(userId, RequestStatus.PENDING);
         return modelMapper.map(requests, new TypeToken<List<SwapRequestDTO>>() {}.getType());
     }
 }
