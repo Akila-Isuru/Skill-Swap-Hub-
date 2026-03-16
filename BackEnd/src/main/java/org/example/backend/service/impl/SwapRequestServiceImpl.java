@@ -49,7 +49,16 @@ public class SwapRequestServiceImpl implements SwapRequestService {
     }
 
     @Override
-    public List<SwapRequestDTO> getRequestsForUser(Long userId) {
+    public List<SwapRequestDTO> getIncomingRequests(Long userId) {
+
+        List<SwapRequest> requests = swapRequestRepository.findAll().stream()
+                .filter(r -> r.getReceiver().getId().equals(userId))
+                .toList();
+        return modelMapper.map(requests, new TypeToken<List<SwapRequestDTO>>() {}.getType());
+    }
+
+    @Override
+    public List<SwapRequestDTO> getOutgoingRequests(Long userId) {
 
         List<SwapRequest> requests = swapRequestRepository.findByReceiverIdAndStatus(userId, RequestStatus.PENDING);
         return modelMapper.map(requests, new TypeToken<List<SwapRequestDTO>>() {}.getType());

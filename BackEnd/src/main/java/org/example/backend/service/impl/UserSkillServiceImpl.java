@@ -65,4 +65,12 @@ public class UserSkillServiceImpl implements UserSkillService {
             return dto;
         }).collect(Collectors.toList());
     }
+
+    @Override
+    public void deleteUserSkill(Long id) {
+        if (!userSkillRepository.existsById(id)) {
+            throw new CustomException("Skill mapping not found!");
+        }
+        userSkillRepository.deleteById(id);
+    }
 }

@@ -7,5 +7,6 @@ import java.util.List;
 public interface SwapRequestService {
     void sendRequest(SwapRequestDTO dto);
     void updateStatus(Long requestId, String status);
-    List<SwapRequestDTO> getRequestsForUser(Long userId);
+    List<SwapRequestDTO> getIncomingRequests(Long userId);
+    List<SwapRequestDTO> getOutgoingRequests(Long userId);
 }

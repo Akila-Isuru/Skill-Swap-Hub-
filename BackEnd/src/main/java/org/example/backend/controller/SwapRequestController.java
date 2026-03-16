@@ -30,8 +30,13 @@ public class SwapRequestController {
         return new ResponseEntity<>(new APIResponse<>(200, "Status Updated to " + status, null), HttpStatus.OK);
     }
 
-    @GetMapping("/pending/{userId}")
-    public ResponseEntity<APIResponse<List<SwapRequestDTO>>> getPending(@PathVariable Long userId) {
-        return new ResponseEntity<>(new APIResponse<>(200, "Success", swapRequestService.getRequestsForUser(userId)), HttpStatus.OK);
+    @GetMapping("/outgoing/{userId}")
+    public ResponseEntity<APIResponse<List<SwapRequestDTO>>> getOutgoing(@PathVariable Long userId) {
+        return new ResponseEntity<>(new APIResponse<>(200, "Success", swapRequestService.getOutgoingRequests(userId)), HttpStatus.OK);
+    }
+
+    @GetMapping("/incoming/{userId}")
+    public ResponseEntity<APIResponse<List<SwapRequestDTO>>> getIncoming(@PathVariable Long userId) {
+        return new ResponseEntity<>(new APIResponse<>(200, "Success", swapRequestService.getIncomingRequests(userId)), HttpStatus.OK);
     }
 }
