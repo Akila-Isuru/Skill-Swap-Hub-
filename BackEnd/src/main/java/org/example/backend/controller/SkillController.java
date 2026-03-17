@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -26,5 +27,9 @@ public class SkillController {
     @GetMapping("/all")
     public ResponseEntity<APIResponse<List<SkillDTO>>> getAll() {
         return new ResponseEntity<>(new APIResponse<>(200, "Success", skillService.getAllSkills()), HttpStatus.OK);
+    }
+    @GetMapping("/trending")
+    public ResponseEntity<APIResponse<List<Map<String, Object>>>> getTrending() {
+        return new ResponseEntity<>(new APIResponse<>(200, "Trending skills fetched successfully", skillService.getTrendingSkills()), HttpStatus.OK);
     }
 }
