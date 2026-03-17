@@ -2,6 +2,8 @@ package org.example.backend.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.example.backend.entity.enums.RequestStatus;
+
 import java.time.LocalDateTime;
 
 @Entity

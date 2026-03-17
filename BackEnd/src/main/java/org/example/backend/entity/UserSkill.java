@@ -2,6 +2,7 @@ package org.example.backend.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.example.backend.entity.enums.SkillType;
 
 @Entity
 @Table(name = "user_skills")

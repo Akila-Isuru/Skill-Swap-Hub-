@@ -1,7 +1,7 @@
 package org.example.backend.service.impl;
 
 import org.example.backend.dto.SwapRequestDTO;
-import org.example.backend.entity.RequestStatus;
+import org.example.backend.entity.enums.RequestStatus;
 import org.example.backend.entity.SwapRequest;
 import org.example.backend.entity.User;
 import org.example.backend.exception.CustomException;

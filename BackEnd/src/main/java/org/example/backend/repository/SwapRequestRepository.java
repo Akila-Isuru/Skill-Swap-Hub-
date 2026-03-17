@@ -1,6 +1,6 @@
 package org.example.backend.repository;
 
-import org.example.backend.entity.RequestStatus;
+import org.example.backend.entity.enums.RequestStatus;
 import org.example.backend.entity.SwapRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 

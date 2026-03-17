@@ -2,7 +2,7 @@ package org.example.backend.service.impl;
 
 import org.example.backend.dto.UserSkillDTO;
 import org.example.backend.entity.Skill;
-import org.example.backend.entity.SkillType;
+import org.example.backend.entity.enums.SkillType;
 import org.example.backend.entity.User;
 import org.example.backend.entity.UserSkill;
 import org.example.backend.exception.CustomException;
