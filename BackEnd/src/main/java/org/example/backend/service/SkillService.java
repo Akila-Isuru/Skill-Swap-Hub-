@@ -8,4 +8,5 @@ public interface SkillService {
     void saveSkill(SkillDTO skillDTO);
     List<SkillDTO> getAllSkills();
     List<java.util.Map<String, Object>> getTrendingSkills();
+    List<SkillDTO> searchSkills(String keyword);
 }

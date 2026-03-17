@@ -32,4 +32,9 @@ public class SkillController {
     public ResponseEntity<APIResponse<List<Map<String, Object>>>> getTrending() {
         return new ResponseEntity<>(new APIResponse<>(200, "Trending skills fetched successfully", skillService.getTrendingSkills()), HttpStatus.OK);
     }
+    @GetMapping("/search")
+    public ResponseEntity<APIResponse<List<SkillDTO>>> searchSkills(@RequestParam String keyword) {
+        List<SkillDTO> results = skillService.searchSkills(keyword);
+        return new ResponseEntity<>(new APIResponse<>(200, "Search results fetched", results), HttpStatus.OK);
+    }
 }

@@ -52,4 +52,9 @@ public class SkillServiceImpl implements SkillService {
         }
         return trendingList;
     }
+    @Override
+    public List<SkillDTO> searchSkills(String keyword) {
+        List<Skill> skills = skillRepository.findBySkillNameContainingIgnoreCase(keyword);
+        return modelMapper.map(skills, new TypeToken<List<SkillDTO>>() {}.getType());
+    }
 }
