@@ -18,16 +18,16 @@ public class SwapRequest {
 
     @ManyToOne
     @JoinColumn(name = "sender_id")
-    private User sender; // Request එක යවන කෙනා
+    private User sender;
 
     @ManyToOne
     @JoinColumn(name = "receiver_id")
-    private User receiver; // Request එක ලැබෙන කෙනා
+    private User receiver;
 
     private String message;
 
     @Enumerated(EnumType.STRING)
-    private RequestStatus status; // PENDING, ACCEPTED, REJECTED, COMPLETED
+    private RequestStatus status;
 
     private LocalDateTime createdAt = LocalDateTime.now();
 }

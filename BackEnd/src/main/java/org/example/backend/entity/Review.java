@@ -15,11 +15,11 @@ public class Review {
 
     @ManyToOne
     @JoinColumn(name = "reviewer_id")
-    private User reviewer; // Review එක දාන කෙනා
+    private User reviewer; // Review eka dana ekkena
 
     @ManyToOne
     @JoinColumn(name = "reviewee_id")
-    private User reviewee; // Review එක ලබන කෙනා
+    private User reviewee; // Review eka ganna ekkena
 
     private int rating; // 1 to 5 stars
     private String comment;

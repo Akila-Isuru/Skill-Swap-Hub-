@@ -27,7 +27,7 @@ public class User {
     @Column(columnDefinition = "TEXT")
     private String bio;
 
-    // One user can have many skill entries (both teaching and learning)
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<UserSkill> userSkills;
 }
