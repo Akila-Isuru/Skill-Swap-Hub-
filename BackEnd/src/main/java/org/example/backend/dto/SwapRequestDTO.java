@@ -12,5 +12,6 @@ public class SwapRequestDTO {
     private Long senderId;
     private Long receiverId;
     private String message;
-    private String status; // PENDING, ACCEPTED, REJECTED, COMPLETED
+    private String status;
+    // PENDING, ACCEPTED, REJECTED, COMPLETED
 }

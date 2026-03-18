@@ -12,6 +12,6 @@ public class ReviewDTO {
     private Long id;
     private Long reviewerId;
     private Long revieweeId;
-    private int rating;      // 1-5 Stars
+    private int rating;
     private String comment;
 }

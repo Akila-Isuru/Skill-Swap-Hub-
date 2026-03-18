@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserSkillDTO {
     private Long id;
-    private Long userId;   // User ගේ ID එක
-    private Long skillId;  // Skill එකේ ID එක
-    private String type;    // TEACH හෝ LEARN
-    private String expertiseLevel; // Beginner, Intermediate, Expert
+    private Long userId;
+    private Long skillId;
+    private String type;
+    private String expertiseLevel;
 }
