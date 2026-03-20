@@ -2,9 +2,90 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>SkillSwap Hub - Dashboard</title>
+    <!--  <link rel="stylesheet" href="css/style.css">-->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* ඔයාගේ POS එකේ style එකට සමාන Dashboard UI එකක් */
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin: 0; display: flex; }
+        .sidebar { width: 250px; background: #2c3e50; color: white; height: 100vh; padding: 20px; }
+        .sidebar h2 { text-align: center; border-bottom: 1px solid #34495e; padding-bottom: 10px; }
+        .nav-link { display: block; color: white; padding: 15px; text-decoration: none; transition: 0.3s; }
+        .nav-link:hover { background: #34495e; border-radius: 5px; }
+
+        .main-content { flex: 1; padding: 30px; }
+        .stats-container { display: flex; gap: 20px; margin-top: 20px; }
+        .stat-card { background: white; padding: 20px; border-radius: 10px; flex: 1; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; }
+        .stat-card h3 { margin: 0; color: #7f8c8d; font-size: 14px; text-transform: uppercase; }
+        .stat-card p { font-size: 28px; font-weight: bold; color: #2c3e50; margin: 10px 0; }
+    </style>
 </head>
 <body>
+
+<div class="sidebar">
+    <h2>SkillSwap</h2>
+    <nav>
+        <a href="index.html" class="nav-link">🏠 Dashboard</a>
+        <a href="pages/my-skills.html" class="nav-link">📚 My Skills</a>
+        <a href="pages/find-matches.html" class="nav-link">🔍 Find Matches</a>
+        <a href="pages/requests.html" class="nav-link">📩 Swap Requests</a>
+    </nav>
+</div>
+
+<div class="main-content">
+    <h1 id="welcome-msg">Welcome, User!</h1>
+    <p id="user-bio" style="color: #636e72;"></p>
+
+    <div class="stats-container">
+        <div class="stat-card">
+            <h3>Average Rating</h3>
+            <p id="stat-rating">0.0</p>
+        </div>
+        <div class="stat-card">
+            <h3>Total Skills</h3>
+            <p id="stat-skills">0</p>
+        </div>
+        <div class="stat-card">
+            <h3>Incoming Requests</h3>
+            <p id="stat-incoming" style="color: #e67e22;">0</p>
+        </div>
+        <div class="stat-card">
+            <h3>Sent Requests</h3>
+            <p id="stat-outgoing">0</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // දැනට අපි හිතමු logged in user ID එක 1 කියලා
+    const loggedInUserId = 1;
+
+    function loadUserSummary() {
+        $.ajax({
+            url: "http://localhost:8080/api/v1/user/summary/" + loggedInUserId,
+            method: "GET",
+            success: function (res) {
+                if (res.code === 200) {
+                    const data = res.data;
+                    $("#welcome-msg").text("Welcome, " + data.userName + "!");
+                    $("#user-bio").text(data.bio);
+                    $("#stat-rating").text(data.averageRating.toFixed(1) + " ⭐");
+                    $("#stat-skills").text(data.totalSkills);
+                    $("#stat-incoming").text(data.pendingIncomingRequests);
+                    $("#stat-outgoing").text(data.totalOutgoingRequests);
+                }
+            },
+            error: function (error) {
+                console.error("Error loading summary", error);
+            }
+        });
+    }
+
+    $(document).ready(function() {
+        loadUserSummary();
+    });
+</script>
+
 
 </body>
 </html>
