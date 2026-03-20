@@ -2,9 +2,128 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>My Skills - SkillSwap Hub</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: #f9f9f9; }
+        .form-container { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); margin-bottom: 25px; }
+        .input-group { display: inline-block; margin-right: 15px; margin-bottom: 10px; }
+        label { display: block; font-weight: 600; margin-bottom: 8px; }
+        select, input { padding: 10px; border: 1px solid #ddd; border-radius: 6px; width: 200px; }
+
+        .btn-save { background: #27ae60; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+
+        table { width: 100%; border-collapse: collapse; background: white; margin-top: 20px; }
+        th, td { border-bottom: 1px solid #eee; padding: 14px; text-align: left; }
+        th { background: #34495e; color: white; }
+    </style>
 </head>
 <body>
 
+<div class="form-container">
+    <h2>Manage My Skills</h2>
+    <div class="input-group">
+        <label>Skill</label>
+        <select id="skill-id">
+            <option value="">Select a Skill</option>
+        </select>
+    </div>
+    <div class="input-group">
+        <label>Type</label>
+        <select id="skill-type">
+            <option value="TEACH">I can Teach</option>
+            <option value="LEARN">I want to Learn</option>
+        </select>
+    </div>
+    <div class="input-group">
+        <label>Expertise Level</label>
+        <select id="expertise-level">
+            <option value="Beginner">Beginner</option>
+            <option value="Intermediate">Intermediate</option>
+            <option value="Expert">Expert</option>
+        </select>
+    </div>
+    <button class="btn-save" onclick="assignSkill()">Add Skill</button>
+</div>
+
+<table>
+    <thead>
+    <tr>
+        <th>Skill Name</th>
+        <th>Type</th>
+        <th>Level</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody id="skill-table-body"></tbody>
+</table>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    const loggedInUserId = 2; // දැනට Akila ගේ ID එක
+
+    function loadAllSkills() {
+        $.get("http://localhost:8080/api/v1/skill/all", function(res) {
+            // res නෙවෙයි, res.data තමයි loop කරන්න ඕනේ
+            if(res.data) {
+                res.data.forEach(s => {
+                    $("#skill-id").append(`<option value="${s.id}">${s.skillName}</option>`);
+                });
+            }
+        });
+    }
+
+    function loadMySkills() {
+        $.get("http://localhost:8080/api/v1/user-skill/user/" + loggedInUserId, function(res) {
+            $("#skill-table-body").empty();
+            if(res.data) {
+                res.data.forEach(s => {
+                    $("#skill-table-body").append(`
+                    <tr>
+                        <td>${s.skillName}</td> <td><span style="color: ${s.type === 'TEACH' ? 'green' : 'blue'}">${s.type}</span></td>
+                        <td>${s.expertiseLevel}</td>
+                        <td><button onclick="deleteSkill(${s.id})" style="color: red; border:none; background:none; cursor:pointer;">Delete</button></td>
+                    </tr>
+                `);
+                });
+            }
+        });
+    }
+    function assignSkill() {
+        const data = {
+            userId: loggedInUserId,
+            skillId: $("#skill-id").val(),
+            type: $("#skill-type").val(),
+            expertiseLevel: $("#expertise-level").val()
+        };
+
+        $.ajax({
+            url: "http://localhost:8080/api/v1/user-skill/assign",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(data),
+            success: function() {
+                alert("Skill added successfully!");
+                loadMySkills();
+            }
+        });
+    }
+
+    function deleteSkill(id) {
+        if(confirm("Are you sure?")) {
+            $.ajax({
+                url: "http://localhost:8080/api/v1/user-skill/" + id,
+                method: "DELETE",
+                success: function() {
+                    loadMySkills();
+                }
+            });
+        }
+    }
+
+    $(document).ready(function() {
+        loadAllSkills();
+        loadMySkills();
+    });
+</script>
 </body>
 </html>

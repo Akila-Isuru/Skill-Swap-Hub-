@@ -60,6 +60,7 @@ public class UserSkillServiceImpl implements UserSkillService {
             dto.setId(s.getId());
             dto.setUserId(s.getUser().getId());
             dto.setSkillId(s.getSkill().getId());
+            dto.setSkillName(s.getSkill().getSkillName());
             dto.setType(s.getType().name());
             dto.setExpertiseLevel(s.getExpertiseLevel());
             return dto;
