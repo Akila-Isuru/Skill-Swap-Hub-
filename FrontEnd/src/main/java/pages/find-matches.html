@@ -2,9 +2,75 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Find Matches - SkillSwap Hub</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; padding: 20px; }
+        .match-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; transition: transform 0.2s; }
+        .match-card:hover { transform: translateY(-3px); }
+        .user-info h3 { margin: 0; color: #2c3e50; font-size: 1.2rem; }
+        .user-info p { margin: 8px 0; color: #7f8c8d; }
+        .skill-tag { background: #3498db; color: white; padding: 5px 12px; border-radius: 20px; font-size: 13px; font-weight: 500; }
+        .btn-request { background: #e67e22; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: background 0.3s; }
+        .btn-request:hover { background: #d35400; }
+    </style>
 </head>
 <body>
 
+<h2>Potential Skill Swappers</h2>
+<p style="color: #666;">ඔබ ඉගෙන ගැනීමට කැමති දේ ඉගැන්වීමට හැකි පුද්ගලයින් මෙහි දැක්වේ.</p>
+
+<div id="matches-container">
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    // දැනට ලොග් වී සිටින යූසර්ගේ ID එක
+    const loggedInUserId = 3;
+
+    function loadMatches() {
+        $.get("http://localhost:8080/api/v1/user-skill/matches/" + loggedInUserId, function(res) {
+            $("#matches-container").empty();
+
+            // Backend එකෙන් APIResponse එක හරහා එන data ලිස්ට් එක චෙක් කිරීම
+            if(!res.data || res.data.length === 0) {
+                $("#matches-container").append("<div class='match-card'><p>No matches found yet. Try adding more skills to your 'Learn' list!</p></div>");
+                return;
+            }
+
+            res.data.forEach(m => {
+                // User ID එක වෙනුවට User Name එක පෙන්වීම
+                // මම කලින් දුන්න විදිහට Backend එකේ skillId එක map කරලා තිබීම අනිවාර්යයි
+                $("#matches-container").append(`
+                    <div class="match-card">
+                        <div class="user-info">
+                            <h3>${m.userName}</h3>
+                            <p>Can teach you: <span class="skill-tag">${m.skillName}</span></p>
+                        </div>
+                        <button class="btn-request" onclick="sendRequest(${m.userId}, ${m.skillId}, '${m.skillName}')">
+                            Send Swap Request
+                        </button>
+                    </div>
+                `);
+            });
+        });
+    }
+
+    function sendRequest(toUserId, skillId, skillName) {
+        // මචං, මේක ඊළඟට අපි හදන Swap Request Table එකට ඩේටා යවන තැන
+        console.log("Requesting Skill ID:", skillId);
+
+        if(!skillId) {
+            alert("Skill ID එක හම්බවුණේ නැහැ මචං. Backend එකේ DTO එක චෙක් කරන්න.");
+            return;
+        }
+
+        alert(`Request sent to ${toUserId} for '${skillName}'!`);
+        // මීළඟට අපි මෙතනට $.ajax POST කෝල් එකක් ලියමු Request එක සේව් කරන්න.
+    }
+
+    $(document).ready(function() {
+        loadMatches();
+    });
+</script>
 </body>
 </html>

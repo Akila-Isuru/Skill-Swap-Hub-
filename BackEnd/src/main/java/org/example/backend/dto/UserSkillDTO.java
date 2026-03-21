@@ -11,6 +11,7 @@ public class UserSkillDTO {
     private Long id;
     private Long userId;
     private Long skillId;
+    private String userName;
     private String skillName;
     private String type;
     private String expertiseLevel;

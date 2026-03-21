@@ -28,4 +28,9 @@ public class UserSkillController {
     public ResponseEntity<APIResponse<List<UserSkillDTO>>> getSkills(@PathVariable Long id) {
         return new ResponseEntity<>(new APIResponse<>(200, "Success", userSkillService.getSkillsByUserId(id)), HttpStatus.OK);
     }
+    @GetMapping("/matches/{userId}")
+    public ResponseEntity<APIResponse<List<UserSkillDTO>>> getMatches(@PathVariable Long userId) {
+        // මම කලින් දීපු logic එක පාවිච්චි කරලා මෙතන Service එක call කරන්න
+        return new ResponseEntity<>(new APIResponse<>(200, "Matches found", userSkillService.findMatchesForUser(userId)), HttpStatus.OK);
+    }
 }

@@ -74,4 +74,23 @@ public class UserSkillServiceImpl implements UserSkillService {
         }
         userSkillRepository.deleteById(id);
     }
+    public List<UserSkillDTO> findMatchesForUser(Long userId) {
+        // 1. මේ යූසර් ඉගෙන ගන්න කැමති (LEARN) ස්කිල් ටික ගන්නවා
+        List<UserSkill> myLearningSkills = userSkillRepository.findByUser(userRepository.findById(userId).get())
+                .stream().filter(s -> s.getType() == SkillType.LEARN).collect(Collectors.toList());
+
+        List<Long> skillIds = myLearningSkills.stream().map(s -> s.getSkill().getId()).collect(Collectors.toList());
+
+        // 2. ඒ ස්කිල් ටිකම උගන්වන්න පුළුවන් (TEACH) අනිත් අයව හොයනවා
+        return userSkillRepository.findMatches(skillIds, SkillType.TEACH, userId)
+                .stream().map(s -> {
+                    UserSkillDTO dto = new UserSkillDTO();
+                    dto.setUserId(s.getUser().getId());
+                    dto.setUserName(s.getUser().getName());
+                    dto.setSkillId(s.getSkill().getId());
+                    dto.setSkillName(s.getSkill().getSkillName());
+                    // යූසර්ගේ නම වගේ දේවල් පෙන්වන්න අලුත් DTO එකක් පාවිච්චි කරන එක වඩා හොඳයි
+                    return dto;
+                }).collect(Collectors.toList());
+    }
 }

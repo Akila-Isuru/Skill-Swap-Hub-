@@ -2,9 +2,95 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Swap Requests - SkillSwap Hub</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; padding: 20px; }
+        .tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid #ddd; }
+        .tab { padding: 10px 25px; cursor: pointer; font-weight: bold; color: #7f8c8d; }
+        .tab.active { color: #3498db; border-bottom: 3px solid #3498db; }
+
+        .request-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; text-transform: uppercase; }
+        .status-pending { background: #f1c40f; color: white; }
+        .status-accepted { background: #2ecc71; color: white; }
+        .status-rejected { background: #e74c3c; color: white; }
+
+        .btn-accept { background: #2ecc71; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; margin-right: 5px; }
+        .btn-reject { background: #e74c3c; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
+    </style>
 </head>
 <body>
 
+<h2>Swap Requests Management</h2>
+
+<div class="tabs">
+    <div class="tab active" onclick="switchTab('incoming', this)">Incoming Requests</div>
+    <div class="tab" onclick="switchTab('outgoing', this)">Outgoing Requests</div>
+</div>
+
+<div id="requests-container">
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    const loggedInUserId = 3; // දැනට Akila ගේ ID එක
+    let currentTab = 'incoming';
+
+    function switchTab(tab, element) {
+        currentTab = tab;
+        $(".tab").removeClass("active");
+        $(element).addClass("active");
+        loadRequests();
+    }
+
+    function loadRequests() {
+        const url = `http://localhost:8080/api/v1/swap/${currentTab}/${loggedInUserId}`;
+
+        $.get(url, function(res) {
+            $("#requests-container").empty();
+            if(!res.data || res.data.length === 0) {
+                $("#requests-container").append("<p>No requests found.</p>");
+                return;
+            }
+
+            res.data.forEach(r => {
+                let actionButtons = '';
+
+                // අපිට ආපු Request එකක් නම් සහ ඒක තවම PENDING නම් විතරක් Accept/Reject පෙන්වන්න
+                if(currentTab === 'incoming' && r.status === 'PENDING') {
+                    actionButtons = `
+                        <div>
+                            <button class="btn-accept" onclick="updateStatus(${r.id}, 'ACCEPTED')">Accept</button>
+                            <button class="btn-reject" onclick="updateStatus(${r.id}, 'REJECTED')">Reject</button>
+                        </div>`;
+                }
+
+                $("#requests-container").append(`
+                    <div class="request-card">
+                        <div>
+                            <strong>${currentTab === 'incoming' ? 'From User: ' + r.senderId : 'To User: ' + r.receiverId}</strong>
+                            <p style="margin: 5px 0; color: #666;">Message: ${r.message || 'No message'}</p>
+                            <span class="status-badge status-${r.status.toLowerCase()}">${r.status}</span>
+                        </div>
+                        ${actionButtons}
+                    </div>
+                `);
+            });
+        });
+    }
+
+    function updateStatus(requestId, status) {
+        $.ajax({
+            url: `http://localhost:8080/api/v1/swap/status/${requestId}/${status}`,
+            method: "PUT",
+            success: function() {
+                alert("Status updated to " + status);
+                loadRequests();
+            }
+        });
+    }
+
+    $(document).ready(loadRequests);
+</script>
 </body>
 </html>
