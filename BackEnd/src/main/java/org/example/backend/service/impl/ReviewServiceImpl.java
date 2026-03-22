@@ -6,6 +6,7 @@ import org.example.backend.entity.User;
 import org.example.backend.exception.CustomException;
 import org.example.backend.repository.ReviewRepository;
 import org.example.backend.repository.UserRepository;
+import org.example.backend.service.NotificationService;
 import org.example.backend.service.ReviewService;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -27,6 +28,9 @@ public class ReviewServiceImpl implements ReviewService {
     @Autowired
     private ModelMapper modelMapper;
 
+    @Autowired
+    private NotificationService notificationService;
+
     @Override
     public void addReview(ReviewDTO dto) {
         User reviewer = userRepository.findById(dto.getReviewerId()).orElseThrow(() -> new CustomException("Reviewer not found"));
@@ -37,6 +41,11 @@ public class ReviewServiceImpl implements ReviewService {
         review.setReviewee(reviewee);
         review.setRating(dto.getRating());
         review.setComment(dto.getComment());
+        notificationService.createNotification(
+                dto.getRevieweeId(),
+                "You received a new " + dto.getRating() + "-star review!",
+                "REVIEW"
+        );
 
         reviewRepository.save(review);
     }

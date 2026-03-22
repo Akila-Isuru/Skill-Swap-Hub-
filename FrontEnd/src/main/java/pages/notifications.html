@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Notifications - SkillSwap Hub</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; padding: 20px; }
+    .notif-container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+    .notif-card {
+      padding: 15px; border-bottom: 1px solid #eee; cursor: pointer;
+      transition: 0.2s; position: relative; border-radius: 8px; margin-bottom: 10px;
+    }
+    .notif-card:hover { background: #f9f9f9; }
+    .unread { background: #e8f4fd !important; border-left: 5px solid #3498db; }
+    .notif-card p { margin: 0; color: #2c3e50; font-size: 15px; }
+    .notif-card small { color: #7f8c8d; font-size: 12px; }
+    .type-badge {
+      display: inline-block; padding: 2px 8px; border-radius: 10px;
+      font-size: 10px; text-transform: uppercase; font-weight: bold; margin-top: 5px;
+    }
+    .badge-swap { background: #e1f5fe; color: #0288d1; }
+    .badge-review { background: #fff3e0; color: #f57c00; }
+  </style>
+</head>
+<body>
+
+<div class="notif-container">
+  <div style="display: flex; justify-content: space-between; align-items: center;">
+    <h2>Notifications</h2>
+    <button onclick="loadNotifications()" style="border:none; background:none; color:#3498db; cursor:pointer;">Refresh</button>
+  </div>
+  <hr>
+  <div id="notif-list">
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script>
+  const loggedInUserId =2; // Akila's ID
+
+  function loadNotifications() {
+    $.get("http://localhost:8080/api/v1/notification/user/" + loggedInUserId, function(res) {
+      $("#notif-list").empty();
+      if(!res.data || res.data.length === 0) {
+        $("#notif-list").append("<p style='text-align:center; color:#999;'>No notifications yet.</p>");
+        return;
+      }
+      res.data.forEach(n => {
+        let unreadClass = n.read ? "" : "unread";
+        let badgeClass = n.type === 'REVIEW' ? 'badge-review' : 'badge-swap';
+
+        $("#notif-list").append(`
+                    <div class="notif-card ${unreadClass}" onclick="markAsRead(${n.id})">
+                        <p>${n.message}</p>
+                        <span class="type-badge ${badgeClass}">${n.type}</span>
+                        <br><small>${n.createdAt.replace('T', ' ')}</small>
+                    </div>
+                `);
+      });
+    });
+  }
+
+  function markAsRead(id) {
+    $.ajax({
+      url: "http://localhost:8080/api/v1/notification/mark-as-read/" + id,
+      method: "PUT",
+      success: function() {
+        loadNotifications();
+      }
+    });
+  }
+
+  $(document).ready(loadNotifications);
+</script>
+</body>
+</html>
