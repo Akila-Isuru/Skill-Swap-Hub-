@@ -12,6 +12,7 @@ import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.stream.Collectors;
 
 import java.util.List;
 
@@ -42,10 +43,19 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public List<ReviewDTO> getReviewsForUser(Long userId) {
-
         List<Review> reviews = reviewRepository.findByRevieweeId(userId);
 
-        return modelMapper.map(reviews, new TypeToken<List<ReviewDTO>>() {}.getType());
+
+        return reviews.stream().map(r -> {
+            ReviewDTO dto = new ReviewDTO();
+            dto.setId(r.getId());
+            dto.setReviewerId(r.getReviewer().getId());
+            dto.setReviewerName(r.getReviewer().getName());
+            dto.setRevieweeId(r.getReviewee().getId());
+            dto.setRating(r.getRating());
+            dto.setComment(r.getComment());
+            return dto;
+        }).collect(java.util.stream.Collectors.toList());
     }
     @Override
     public Double getAverageRating(Long userId) {

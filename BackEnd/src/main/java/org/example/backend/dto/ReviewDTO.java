@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 public class ReviewDTO {
     private Long id;
     private Long reviewerId;
+    private String reviewerName;
     private Long revieweeId;
     private int rating;
     private String comment;

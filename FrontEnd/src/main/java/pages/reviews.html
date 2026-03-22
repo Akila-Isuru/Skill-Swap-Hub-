@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Reviews & Ratings - SkillSwap Hub</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; padding: 20px; }
+    .review-container { max-width: 800px; margin: auto; }
+    .add-review-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 25px; }
+    .review-list-card { background: white; padding: 20px; border-radius: 12px; margin-bottom: 15px; border-left: 5px solid #f1c40f; }
+    select, textarea { width: 100%; padding: 10px; margin-top: 10px; border-radius: 6px; border: 1px solid #ddd; }
+    .btn-submit { background: #f1c40f; color: #2c3e50; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 15px; }
+    .rating-star { color: #f1c40f; font-size: 1.2rem; }
+  </style>
+</head>
+<body>
+
+<div class="review-container">
+  <h2>Reviews & Feedback</h2>
+
+  <div class="add-review-card">
+    <h3>Rate a Swapper</h3>
+    <label>Select User to Review</label>
+    <select id="reviewee-id">
+    </select>
+
+    <label>Rating</label>
+    <select id="rating-value">
+      <option value="5">⭐⭐⭐⭐⭐ (Excellent)</option>
+      <option value="4">⭐⭐⭐⭐ (Good)</option>
+      <option value="3">⭐⭐⭐ (Average)</option>
+      <option value="2">⭐⭐ (Poor)</option>
+      <option value="1">⭐ (Very Bad)</option>
+    </select>
+
+    <label>Comment</label>
+    <textarea id="review-comment" placeholder="Share your experience..."></textarea>
+
+    <button class="btn-submit" onclick="submitReview()">Submit Review</button>
+  </div>
+
+  <h3>Past Reviews for You</h3>
+  <div id="reviews-list">
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  const loggedInUserId = 1; // දැනට අපි හිතමු ID 1 කියලා
+
+  function loadUsers() {
+    $.get("http://localhost:8080/api/v1/user/all", function(res) {
+      res.data.forEach(u => {
+        if(u.id !== loggedInUserId) {
+          $("#reviewee-id").append(`<option value="${u.id}">${u.name}</option>`);
+        }
+      });
+    });
+  }
+
+  function loadMyReviews() {
+    $.get("http://localhost:8080/api/v1/review/user/" + loggedInUserId, function(res) {
+      $("#reviews-list").empty();
+      if(res.data.length === 0) {
+        $("#reviews-list").append("<p>No reviews yet.</p>");
+        return;
+      }
+      res.data.forEach(r => {
+        let stars = "⭐".repeat(r.rating);
+        $("#reviews-list").append(`
+                    <div class="review-list-card">
+                        <div class="rating-star">${stars}</div>
+                        <p><strong>Reviewer : ${r.reviewerName}</strong></p>
+                        <p style="color: #555;">${r.comment}</p>
+                    </div>
+                `);
+      });
+    });
+  }
+
+  function submitReview() {
+    const data = {
+      reviewerId: loggedInUserId,
+      revieweeId: $("#reviewee-id").val(),
+      rating: $("#rating-value").val(),
+      comment: $("#review-comment").val()
+    };
+
+    $.ajax({
+      url: "http://localhost:8080/api/v1/review",
+      method: "POST",
+      contentType: "application/json",
+      data: JSON.stringify(data),
+      success: function() {
+        alert("Review added successfully!");
+        loadMyReviews();
+      }
+    });
+  }
+
+  $(document).ready(function() {
+    loadUsers();
+    loadMyReviews();
+  });
+</script>
+</body>
+</html>
