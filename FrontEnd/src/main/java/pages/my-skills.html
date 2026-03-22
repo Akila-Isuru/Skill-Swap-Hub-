@@ -7,39 +7,29 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 30px; background: #f4f7f6; color: #2c3e50; }
         .form-container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 30px; }
         h2 { margin-top: 0; color: #34495e; font-weight: 600; }
-
         .input-row { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end; }
         .input-group { display: flex; flex-direction: column; flex: 1; min-width: 200px; position: relative; }
-
         label { font-weight: 600; margin-bottom: 8px; font-size: 14px; }
         input, select { padding: 12px; border: 1px solid #dcdde1; border-radius: 8px; font-size: 15px; outline: none; transition: 0.3s; }
         input:focus, select:focus { border-color: #3498db; box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2); }
 
-        /* Suggestion Box Styling */
+        /* Suggestion Box */
         #skill-suggestions {
             position: absolute; top: 100%; left: 0; right: 0; background: white;
             border: 1px solid #ddd; border-radius: 0 0 8px 8px; z-index: 1000;
-            display: none; max-height: 200px; overflow-y: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: none; max-height: 250px; overflow-y: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         .suggestion-item { padding: 12px; cursor: pointer; border-bottom: 1px solid #f1f1f1; font-size: 14px; }
-        .suggestion-item:last-child { border-bottom: none; }
         .suggestion-item:hover { background: #f8f9fa; color: #3498db; }
+        .new-skill-btn { background: #f0f7ff; color: #007bff; font-weight: bold; border-top: 2px solid #eef2f7; }
 
-        .btn-save { background: #27ae60; color: white; border: none; padding: 12px 25px; border-radius: 8px;
-            cursor: pointer; font-weight: bold; transition: 0.3s; height: 46px; }
-        .btn-save:hover { background: #219150; transform: translateY(-2px); }
-
-        table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        th, td { padding: 15px; text-align: left; }
-        th { background: #34495e; color: white; text-transform: uppercase; font-size: 13px; letter-spacing: 1px; }
-        tr:last-child td { border-bottom: none; }
-        td { border-bottom: 1px solid #eee; }
-
+        .btn-save { background: #27ae60; color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; height: 46px; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #34495e; color: white; }
         .badge { padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
         .badge-teach { background: #eafaf1; color: #27ae60; }
         .badge-learn { background: #ebf5fb; color: #3498db; }
-        .btn-delete { color: #e74c3c; border: none; background: none; cursor: pointer; font-weight: bold; }
-        .btn-delete:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -48,8 +38,8 @@
     <h2>Manage My Skills</h2>
     <div class="input-row">
         <div class="input-group">
-            <label>Skill (Type to search)</label>
-            <input type="text" id="skill-search" placeholder="e.g. Java, Python, UI/UX" autocomplete="off">
+            <label>Skill Name</label>
+            <input type="text" id="skill-search" placeholder="Type a skill..." autocomplete="off">
             <input type="hidden" id="selected-skill-id">
             <div id="skill-suggestions"></div>
         </div>
@@ -77,41 +67,35 @@
 
 <table>
     <thead>
-    <tr>
-        <th>Skill Name</th>
-        <th>Purpose</th>
-        <th>Proficiency</th>
-        <th>Action</th>
-    </tr>
+    <tr><th>Skill Name</th><th>Purpose</th><th>Proficiency</th><th>Action</th></tr>
     </thead>
-    <tbody id="skill-table-body">
-    </tbody>
+    <tbody id="skill-table-body"></tbody>
 </table>
 
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script>
-    const loggedInUserId = 2; // Akila's ID
+    const loggedInUserId = 1; // Akila's ID
 
-
+    // 🔍 Search & Suggestions
     $("#skill-search").on("input", function() {
         let keyword = $(this).val();
+        let div = $("#skill-suggestions");
+
         if (keyword.length >= 2) {
             $.get("http://localhost:8080/api/v1/skill/search?keyword=" + keyword, function(res) {
-                let div = $("#skill-suggestions");
                 div.empty().show();
                 if (res.data && res.data.length > 0) {
                     res.data.forEach(s => {
                         div.append(`<div class="suggestion-item" onclick="selectSkill(${s.id}, '${s.skillName}')">${s.skillName}</div>`);
                     });
-                } else {
-                    div.append(`<div class="suggestion-item">No results found</div>`);
                 }
+
+                div.append(`<div class="suggestion-item new-skill-btn" onclick="addNewSkillOption('${keyword}')">It's not exist.Add "${keyword}" as a new skill</div>`);
             });
         } else {
-            $("#skill-suggestions").hide();
+            div.hide();
         }
     });
-
 
     function selectSkill(id, name) {
         $("#skill-search").val(name);
@@ -119,39 +103,26 @@
         $("#skill-suggestions").hide();
     }
 
-
-    function loadMySkills() {
-        $.get("http://localhost:8080/api/v1/user-skill/user/" + loggedInUserId, function(res) {
-            const tbody = $("#skill-table-body");
-            tbody.empty();
-            if(res.data) {
-                res.data.forEach(s => {
-                    let typeClass = s.type === 'TEACH' ? 'badge-teach' : 'badge-learn';
-                    tbody.append(`
-                        <tr>
-                            <td><strong>${s.skillName}</strong></td>
-                            <td><span class="badge ${typeClass}">${s.type}</span></td>
-                            <td>${s.expertiseLevel}</td>
-                            <td><button class="btn-delete" onclick="deleteSkill(${s.id})">Remove</button></td>
-                        </tr>
-                    `);
-                });
-            }
-        });
+    function addNewSkillOption(name) {
+        $("#skill-search").val(name);
+        $("#selected-skill-id").val(0); // 0 කියන්නේ අලුත් එකක්
+        $("#skill-suggestions").hide();
     }
 
-
+    // ➕ Add Skill to Profile
     function assignSkill() {
+        const skillName = $("#skill-search").val();
         const skillId = $("#selected-skill-id").val();
 
-        if(!skillId || $("#skill-search").val() === "") {
-            alert("Please select a valid skill from the suggestions!");
+        if(!skillName) {
+            alert("Please type or select a skill!");
             return;
         }
 
         const data = {
             userId: loggedInUserId,
-            skillId: parseInt(skillId),
+            skillId: skillId ? parseInt(skillId) : null,
+            skillName: skillName,
             type: $("#skill-type").val(),
             expertiseLevel: $("#expertise-level").val()
         };
@@ -167,35 +138,40 @@
                 $("#selected-skill-id").val("");
                 loadMySkills();
             },
-            error: function() {
-                alert("Failed to add skill. Maybe you already added it?");
+            error: function(err) {
+                alert("Error: " + (err.responseJSON ? err.responseJSON.message : "Failed"));
             }
         });
     }
 
+    function loadMySkills() {
+        $.get("http://localhost:8080/api/v1/user-skill/user/" + loggedInUserId, function(res) {
+            const tbody = $("#skill-table-body").empty();
+            if(res.data) {
+                res.data.forEach(s => {
+                    let badge = s.type === 'TEACH' ? 'badge-teach' : 'badge-learn';
+                    tbody.append(`<tr>
+                        <td><strong>${s.skillName}</strong></td>
+                        <td><span class="badge ${badge}">${s.type}</span></td>
+                        <td>${s.expertiseLevel}</td>
+                        <td><button style="color:red; cursor:pointer;" onclick="deleteSkill(${s.id})">Delete</button></td>
+                    </tr>`);
+                });
+            }
+        });
+    }
 
     function deleteSkill(id) {
-        if(confirm("Are you sure you want to remove this skill?")) {
+        if(confirm("Remove this skill?")) {
             $.ajax({
                 url: "http://localhost:8080/api/v1/user-skill/" + id,
                 method: "DELETE",
-                success: function() {
-                    loadMySkills();
-                }
+                success: loadMySkills
             });
         }
     }
 
-    // Close suggestions when clicking outside
-    $(document).click(function(e) {
-        if (!$(e.target).closest('.search-container').length) {
-            $("#skill-suggestions").hide();
-        }
-    });
-
-    $(document).ready(function() {
-        loadMySkills();
-    });
+    $(document).ready(loadMySkills);
 </script>
 </body>
 </html>
