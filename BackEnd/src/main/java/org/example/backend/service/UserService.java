@@ -12,4 +12,5 @@ public interface UserService {
     List<UserDTO> getAllUsers();
     UserDTO getUserById(Long id);
     UserSummaryDTO getUserSummary(Long userId);
+    public List<UserSummaryDTO> getTopRatedUsers();
 }

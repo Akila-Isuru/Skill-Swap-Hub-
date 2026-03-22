@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.example.backend.exception.CustomException;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -107,5 +108,18 @@ public class UserServiceImpl implements UserService {
         summary.setTotalOutgoingRequests(totalOutgoing);
 
         return summary;
+    }
+
+    @Override
+    public List<UserSummaryDTO> getTopRatedUsers() {
+
+        List<User> allUsers = userRepository.findAll();
+
+
+        return allUsers.stream()
+                .map(user -> getUserSummary(user.getId()))
+                .sorted((u1, u2) -> u2.getAverageRating().compareTo(u1.getAverageRating()))
+                .limit(5)
+                .collect(Collectors.toList());
     }
 }

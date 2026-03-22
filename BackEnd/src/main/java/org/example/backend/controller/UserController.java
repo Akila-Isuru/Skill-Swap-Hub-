@@ -51,4 +51,8 @@ public class UserController {
     public ResponseEntity<APIResponse<UserSummaryDTO>> getUserSummary(@PathVariable Long userId) {
         return new ResponseEntity<>(new APIResponse<>(200, "User summary fetched", userService.getUserSummary(userId)), HttpStatus.OK);
     }
+    @GetMapping("/leaderboard")
+    public ResponseEntity<APIResponse<List<UserSummaryDTO>>> getLeaderboard() {
+        return new ResponseEntity<>(new APIResponse<>(200, "Success", userService.getTopRatedUsers()), HttpStatus.OK);
+    }
 }

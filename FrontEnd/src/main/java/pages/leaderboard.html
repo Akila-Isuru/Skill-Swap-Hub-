@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Leaderboard - SkillSwap Hub</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; padding: 20px; }
+    .leaderboard-card { max-width: 700px; margin: auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+    .user-row { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #eee; transition: 0.3s; }
+    .user-row:hover { background: #f9f9f9; transform: scale(1.02); }
+    .rank { font-size: 24px; font-weight: bold; width: 50px; color: #3498db; }
+    .user-details { flex: 1; }
+    .user-details h3 { margin: 0; color: #2c3e50; }
+    .rating-badge { background: #f1c40f; color: #2c3e50; padding: 5px 12px; border-radius: 20px; font-weight: bold; }
+    .gold { color: #d4af37; } /* 1st place */
+  </style>
+</head>
+<body>
+
+<div class="leaderboard-card">
+  <h2 style="text-align: center; color: #2c3e50;">🏆 Top Rated Skill Swappers</h2>
+  <hr>
+  <div id="leaderboard-list">
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script>
+  function loadLeaderboard() {
+    $.get("http://localhost:8080/api/v1/user/leaderboard", function(res) {
+      $("#leaderboard-list").empty();
+      res.data.forEach((u, index) => {
+        let rankIcon = (index === 0) ? "🥇" : (index === 1) ? "🥈" : (index === 2) ? "🥉" : (index + 1);
+
+        $("#leaderboard-list").append(`
+                    <div class="user-row">
+                        <div class="rank">${rankIcon}</div>
+                        <div class="user-details">
+                            <h3>${u.userName}</h3>
+                            <small style="color: #7f8c8d;">${u.totalSkills} Skills Shared</small>
+                        </div>
+                        <div class="rating-badge">${u.averageRating.toFixed(1)} ⭐</div>
+                    </div>
+                `);
+      });
+    });
+  }
+
+  $(document).ready(loadLeaderboard);
+</script>
+</body>
+</html>
