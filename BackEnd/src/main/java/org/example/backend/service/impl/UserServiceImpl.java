@@ -49,12 +49,22 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void updateUser(UserDTO userDTO) {
-        if (!userRepository.existsById(userDTO.getId())) {
-            throw new CustomException("User not found!");
-        }
-        userRepository.save(modelMapper.map(userDTO, User.class));
-    }
 
+        User existUser = userRepository.findById(userDTO.getId())
+                .orElseThrow(() -> new CustomException("User not found!"));
+
+
+        existUser.setName(userDTO.getName());
+        existUser.setEmail(userDTO.getEmail());
+        existUser.setBio(userDTO.getBio());
+
+
+        if (userDTO.getPassword() != null && !userDTO.getPassword().isEmpty()) {
+            existUser.setPassword(userDTO.getPassword());
+        }
+
+        userRepository.save(existUser);
+    }
     @Override
     public void deleteUser(Long id) {
         userRepository.deleteById(id);

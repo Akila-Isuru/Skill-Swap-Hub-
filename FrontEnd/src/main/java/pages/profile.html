@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Profile - SkillSwap Hub</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; padding: 20px; }
+        .profile-container { max-width: 600px; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin: auto; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; color: #34495e; }
+        input, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        textarea { height: 100px; resize: vertical; }
+        .btn-update { background: #3498db; color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; }
+        .btn-update:hover { background: #2980b9; }
+        .readonly-info { background: #eee; color: #7f8c8d; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+<div class="profile-container">
+    <h2>My Profile Settings</h2>
+    <hr>
+    <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="profile-name">
+    </div>
+    <div class="form-group">
+        <label>Email (Cannot Change)</label>
+        <input type="email" id="profile-email" class="readonly-info" readonly>
+    </div>
+    <div class="form-group">
+        <label>Bio</label>
+        <textarea id="profile-bio" placeholder="Tell us about yourself..."></textarea>
+    </div>
+    <div class="form-group">
+        <label>New Password (Leave blank to keep current)</label>
+        <input type="password" id="profile-password">
+    </div>
+    <button class="btn-update" onclick="updateProfile()">Update Profile</button>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    const loggedInUserId = 1; // දැනට පාවිච්චි කරන User ID එක
+
+    function loadProfileData() {
+        $.get("http://localhost:8080/api/v1/user/" + loggedInUserId, function(res) {
+            if(res.data) {
+                $("#profile-name").val(res.data.name);
+                $("#profile-email").val(res.data.email);
+                $("#profile-bio").val(res.data.bio);
+            }
+        });
+    }
+
+    function updateProfile() {
+        const updatedData = {
+            id: loggedInUserId,
+            name: $("#profile-name").val(),
+            email: $("#profile-email").val(),
+            bio: $("#profile-bio").val(),
+            password: $("#profile-password").val() || undefined // Password එක ගැහුවේ නැත්නම් ඒක යවන්නේ නැහැ
+        };
+
+        $.ajax({
+            url: "http://localhost:8080/api/v1/user",
+            method: "PUT",
+            contentType: "application/json",
+            data: JSON.stringify(updatedData),
+            success: function() {
+                alert("Profile Updated Successfully!");
+                window.location.reload();
+            },
+            error: function() {
+                alert("Error updating profile.");
+            }
+        });
+    }
+
+    $(document).ready(loadProfileData);
+</script>
+</body>
+</html>
