@@ -3,6 +3,7 @@ package org.example.backend.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.List;
+import org.example.backend.entity.enums.Role;
 
 @Entity
 @Table(name = "users")
@@ -10,6 +11,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,6 +28,9 @@ public class User {
 
     @Column(columnDefinition = "TEXT")
     private String bio;
+
+    @Enumerated(EnumType.STRING)
+    private Role role; // USER හෝ ADMIN
 
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)

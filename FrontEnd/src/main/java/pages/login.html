@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login - Skill Swap Hub</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<h2>Login</h2>
+<input type="email" id="loginEmail" placeholder="Email"><br>
+<input type="password" id="loginPassword" placeholder="Password"><br>
+<button onclick="loginUser()">Login</button>
+<p>New here? <a href="register.html">Register now</a></p>
+
+<script>
+  function loginUser() {
+    const authData = {
+      email: $('#loginEmail').val(),
+      password: $('#loginPassword').val()
+    };
+
+    $.ajax({
+      url: "http://localhost:8080/api/v1/auth/login",
+      method: "POST",
+      contentType: "application/json",
+      data: JSON.stringify(authData),
+      success: function (res) {
+        if (res.code === 200) {
+          localStorage.setItem('token', res.data.access_token);
+          localStorage.setItem('userId', String(res.data.userId));
+          localStorage.setItem('userName', res.data.userName);
+
+          window.location.replace("../index.html");
+        }
+      },
+      error: function(err) {
+        alert("Invalid Credentials!");
+      }
+    });
+  }
+</script>
+</body>
+</html>
