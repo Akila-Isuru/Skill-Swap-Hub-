@@ -2,61 +2,87 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Notifications - SkillSwap Hub</title>
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  <script>
+
+    const token = localStorage.getItem('token');
+    const loggedInUserId = localStorage.getItem('userId');
+
+    if (!token || !loggedInUserId || loggedInUserId === "undefined") {
+      window.location.replace("login.html");
+    }
+  </script>
   <style>
-    body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; padding: 20px; }
+    body { font-family: 'Inter', 'Segoe UI', sans-serif; background: #f4f7f6; padding: 20px; }
     .notif-container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
     .notif-card {
-      padding: 15px; border-bottom: 1px solid #eee; cursor: pointer;
+      padding: 15px; border-bottom: 1px solid #f1f5f9; cursor: pointer;
       transition: 0.2s; position: relative; border-radius: 8px; margin-bottom: 10px;
     }
-    .notif-card:hover { background: #f9f9f9; }
-    .unread { background: #e8f4fd !important; border-left: 5px solid #3498db; }
-    .notif-card p { margin: 0; color: #2c3e50; font-size: 15px; }
-    .notif-card small { color: #7f8c8d; font-size: 12px; }
+    .notif-card:hover { background: #f8fafc; }
+    .unread { background: #eff6ff !important; border-left: 5px solid #3b82f6; }
+    .notif-card p { margin: 0; color: #1e293b; font-size: 15px; font-weight: 500; }
+    .notif-card small { color: #64748b; font-size: 12px; margin-top: 5px; display: block; }
     .type-badge {
       display: inline-block; padding: 2px 8px; border-radius: 10px;
-      font-size: 10px; text-transform: uppercase; font-weight: bold; margin-top: 5px;
+      font-size: 10px; text-transform: uppercase; font-weight: bold; margin-top: 8px;
     }
-    .badge-swap { background: #e1f5fe; color: #0288d1; }
-    .badge-review { background: #fff3e0; color: #f57c00; }
+    .badge-swap { background: #dbeafe; color: #1d4ed8; }
+    .badge-review { background: #ffedd5; color: #9a3412; }
+    .back-link { margin-bottom: 20px; display: inline-block; text-decoration: none; color: #3b82f6; font-weight: 500; }
+    h2 { margin: 0; color: #0f172a; }
   </style>
 </head>
 <body>
 
+<a href="../index.html" class="back-link">← Back to Dashboard</a>
+
 <div class="notif-container">
-  <div style="display: flex; justify-content: space-between; align-items: center;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
     <h2>Notifications</h2>
-    <button onclick="loadNotifications()" style="border:none; background:none; color:#3498db; cursor:pointer;">Refresh</button>
+    <button onclick="loadNotifications()" style="border:none; background:none; color:#3b82f6; font-weight:600; cursor:pointer;">Refresh</button>
   </div>
-  <hr>
+  <hr style="border: 0; border-top: 1px solid #e2e8f0; margin-bottom: 20px;">
   <div id="notif-list">
   </div>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script>
-  const loggedInUserId =2; // Akila's ID
-
   function loadNotifications() {
-    $.get("http://localhost:8080/api/v1/notification/user/" + loggedInUserId, function(res) {
-      $("#notif-list").empty();
-      if(!res.data || res.data.length === 0) {
-        $("#notif-list").append("<p style='text-align:center; color:#999;'>No notifications yet.</p>");
-        return;
-      }
-      res.data.forEach(n => {
-        let unreadClass = n.read ? "" : "unread";
-        let badgeClass = n.type === 'REVIEW' ? 'badge-review' : 'badge-swap';
+    $.ajax({
+      url: "http://localhost:8080/api/v1/notification/user/" + loggedInUserId,
+      method: "GET",
+      headers: { "Authorization": "Bearer " + token },
+      success: function(res) {
+        $("#notif-list").empty();
+        if(!res.data || res.data.length === 0) {
+          $("#notif-list").append("<p style='text-align:center; color:#64748b; padding: 20px;'>No notifications yet.</p>");
+          return;
+        }
+        res.data.forEach(n => {
+          let unreadClass = n.read ? "" : "unread";
+          let badgeClass = n.type === 'REVIEW' ? 'badge-review' : 'badge-swap';
 
-        $("#notif-list").append(`
-                    <div class="notif-card ${unreadClass}" onclick="markAsRead(${n.id})">
-                        <p>${n.message}</p>
-                        <span class="type-badge ${badgeClass}">${n.type}</span>
-                        <br><small>${n.createdAt.replace('T', ' ')}</small>
-                    </div>
-                `);
-      });
+
+          let dateStr = n.createdAt ? n.createdAt.replace('T', ' ').split('.')[0] : "Just now";
+
+          $("#notif-list").append(`
+                <div class="notif-card ${unreadClass}" onclick="markAsRead(${n.id})">
+                    <p>${n.message}</p>
+                    <span class="type-badge ${badgeClass}">${n.type}</span>
+                    <small>${dateStr}</small>
+                </div>
+            `);
+        });
+      },
+      error: function(err) {
+        console.error("Failed to load notifications:", err);
+        if (err.status === 401) {
+          window.location.replace("login.html");
+        }
+      }
     });
   }
 
@@ -64,8 +90,12 @@
     $.ajax({
       url: "http://localhost:8080/api/v1/notification/mark-as-read/" + id,
       method: "PUT",
+      headers: { "Authorization": "Bearer " + token },
       success: function() {
         loadNotifications();
+      },
+      error: function(err) {
+        console.error("Failed to mark as read:", err);
       }
     });
   }
