@@ -1,92 +1,134 @@
-<!--requests.html-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Swap Requests - SkillSwap Hub</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+
+        const token = localStorage.getItem('token');
+        const loggedInUserId = localStorage.getItem('userId');
+
+        if (!token || !loggedInUserId || loggedInUserId === "undefined") {
+            window.location.replace("login.html");
+        }
+    </script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; padding: 20px; }
-        .tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid #ddd; }
-        .tab { padding: 10px 25px; cursor: pointer; font-weight: bold; color: #7f8c8d; }
-        .tab.active { color: #3498db; border-bottom: 3px solid #3498db; }
+        body { font-family: 'Inter', 'Segoe UI', sans-serif; background: #f4f7f6; padding: 20px; color: #1e293b; }
+        .container { max-width: 900px; margin: auto; }
+        .tabs { display: flex; margin-bottom: 25px; border-bottom: 2px solid #e2e8f0; background: white; border-radius: 8px 8px 0 0; }
+        .tab { padding: 15px 30px; cursor: pointer; font-weight: 600; color: #64748b; transition: 0.3s; }
+        .tab.active { color: #3b82f6; border-bottom: 3px solid #3b82f6; background: #eff6ff; }
 
-        .request-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
-        .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; text-transform: uppercase; }
-        .status-pending { background: #f1c40f; color: white; }
-        .status-accepted { background: #2ecc71; color: white; }
-        .status-rejected { background: #e74c3c; color: white; }
+        .request-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #e2e8f0; }
+        .status-badge { padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-accepted { background: #dcfce7; color: #166534; }
+        .status-rejected { background: #fee2e2; color: #991b1b; }
 
-        .btn-accept { background: #2ecc71; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; margin-right: 5px; }
-        .btn-reject { background: #e74c3c; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
+        .btn-accept { background: #22c55e; color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-right: 8px; transition: 0.2s; }
+        .btn-accept:hover { background: #16a34a; }
+        .btn-reject { background: #ef4444; color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .btn-reject:hover { background: #dc2626; }
+
+        .back-link { text-decoration: none; color: #3b82f6; font-weight: 500; display: inline-block; margin-bottom: 20px; }
+        .user-label { font-size: 16px; color: #0f172a; margin-bottom: 5px; display: block; }
+        .msg-text { color: #64748b; font-size: 14px; margin: 8px 0; font-style: italic; }
     </style>
 </head>
 <body>
 
-<h2>Swap Requests Management</h2>
+<div class="container">
+    <a href="../index.html" class="back-link">← Back to Dashboard</a>
+    <h2>Swap Requests Management</h2>
 
-<div class="tabs">
-    <div class="tab active" onclick="switchTab('incoming', this)">Incoming Requests</div>
-    <div class="tab" onclick="switchTab('outgoing', this)">Outgoing Requests</div>
+    <div class="tabs">
+        <div class="tab active" id="tab-incoming" onclick="switchTab('incoming')">Incoming Requests</div>
+        <div class="tab" id="tab-outgoing" onclick="switchTab('outgoing')">Outgoing Requests</div>
+    </div>
+
+    <div id="requests-container">
+    </div>
 </div>
 
-<div id="requests-container">
-</div>
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    const loggedInUserId = 2; // දැනට Akila ගේ ID එක
     let currentTab = 'incoming';
 
-    function switchTab(tab, element) {
+    function switchTab(tab) {
         currentTab = tab;
         $(".tab").removeClass("active");
-        $(element).addClass("active");
+        if (tab === 'incoming') $("#tab-incoming").addClass("active");
+        else $("#tab-outgoing").addClass("active");
         loadRequests();
     }
 
     function loadRequests() {
+
         const url = `http://localhost:8080/api/v1/swap/${currentTab}/${loggedInUserId}`;
 
-        $.get(url, function(res) {
-            $("#requests-container").empty();
-            if(!res.data || res.data.length === 0) {
-                $("#requests-container").append("<p>No requests found.</p>");
-                return;
-            }
-
-            res.data.forEach(r => {
-                let actionButtons = '';
-
-                // අපිට ආපු Request එකක් නම් සහ ඒක තවම PENDING නම් විතරක් Accept/Reject පෙන්වන්න
-                if(currentTab === 'incoming' && r.status === 'PENDING') {
-                    actionButtons = `
-                        <div>
-                            <button class="btn-accept" onclick="updateStatus(${r.id}, 'ACCEPTED')">Accept</button>
-                            <button class="btn-reject" onclick="updateStatus(${r.id}, 'REJECTED')">Reject</button>
-                        </div>`;
+        $.ajax({
+            url: url,
+            method: "GET",
+            headers: { "Authorization": "Bearer " + token },
+            success: function(res) {
+                const container = $("#requests-container").empty();
+                if(!res.data || res.data.length === 0) {
+                    container.append("<div style='text-align:center; padding:40px; color:#64748b; background:white; border-radius:12px;'>No requests found in this section.</div>");
+                    return;
                 }
 
-                $("#requests-container").append(`
-                    <div class="request-card">
-                        <div>
-                            <strong>${currentTab === 'incoming' ? 'From User: ' + r.senderId : 'To User: ' + r.receiverId}</strong>
-                            <p style="margin: 5px 0; color: #666;">Message: ${r.message || 'No message'}</p>
-                            <span class="status-badge status-${r.status.toLowerCase()}">${r.status}</span>
+                res.data.forEach(r => {
+                    let actionButtons = '';
+                    let statusClass = `status-${r.status.toLowerCase()}`;
+
+
+                    if(currentTab === 'incoming' && r.status === 'PENDING') {
+                        actionButtons = `
+                            <div>
+                                <button class="btn-accept" onclick="updateStatus(${r.id}, 'ACCEPTED')">Accept</button>
+                                <button class="btn-reject" onclick="updateStatus(${r.id}, 'REJECTED')">Reject</button>
+                            </div>`;
+                    }
+
+                    let personLabel = currentTab === 'incoming'
+                        ? `From: <strong>${r.senderName || 'User ' + r.senderId}</strong>`
+                        : `Sent To: <strong>${r.receiverName || 'User ' + r.receiverId}</strong>`;
+
+                    container.append(`
+                        <div class="request-card">
+                            <div>
+                                <span class="user-label">${personLabel}</span>
+                                <p class="msg-text">Skill Requested: <strong>${r.skillName || 'Skill ID: ' + r.skillId}</strong></p>
+                                <p class="msg-text">Message: ${r.message || 'No message provided'}</p>
+                                <span class="status-badge ${statusClass}">${r.status}</span>
+                            </div>
+                            ${actionButtons}
                         </div>
-                        ${actionButtons}
-                    </div>
-                `);
-            });
+                    `);
+                });
+            },
+            error: function(err) {
+                console.error("Load failed:", err);
+                if (err.status === 401) window.location.replace("login.html");
+            }
         });
     }
 
-    function updateStatus(requestId, status) {
+    function updateStatus(requestId, newStatus) {
+        if (!confirm(`Are you sure you want to ${newStatus.toLowerCase()} this request?`)) return;
+
         $.ajax({
-            url: `http://localhost:8080/api/v1/swap/status/${requestId}/${status}`,
+            url: `http://localhost:8080/api/v1/swap/status/${requestId}/${newStatus}`,
             method: "PUT",
+            headers: { "Authorization": "Bearer " + token },
             success: function() {
-                alert("Status updated to " + status);
+                alert("Request " + newStatus.toLowerCase() + " successfully!");
                 loadRequests();
+            },
+            error: function(err) {
+                alert("Error updating status. Please try again.");
+                console.error(err);
             }
         });
     }
