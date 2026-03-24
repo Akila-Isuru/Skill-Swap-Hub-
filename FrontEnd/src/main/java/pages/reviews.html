@@ -2,26 +2,50 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Reviews & Ratings - SkillSwap Hub</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+
+    const token = localStorage.getItem('token');
+    const loggedInUserId = localStorage.getItem('userId');
+
+    if (!token || !loggedInUserId || loggedInUserId === "undefined") {
+      window.location.replace("login.html");
+    }
+  </script>
   <style>
-    body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; padding: 20px; }
+    body { font-family: 'Inter', 'Segoe UI', sans-serif; background: #f4f7f6; padding: 20px; color: #1e293b; }
     .review-container { max-width: 800px; margin: auto; }
-    .add-review-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 25px; }
-    .review-list-card { background: white; padding: 20px; border-radius: 12px; margin-bottom: 15px; border-left: 5px solid #f1c40f; }
-    select, textarea { width: 100%; padding: 10px; margin-top: 10px; border-radius: 6px; border: 1px solid #ddd; }
-    .btn-submit { background: #f1c40f; color: #2c3e50; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 15px; }
-    .rating-star { color: #f1c40f; font-size: 1.2rem; }
+    .add-review-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #e2e8f0; }
+    .review-list-card { background: white; padding: 20px; border-radius: 12px; margin-bottom: 15px; border-left: 5px solid #f1c40f; box-shadow: 0 2px 5px rgba(0,0,0,0.02); border-top: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; }
+
+    label { display: block; font-weight: 600; margin-top: 15px; margin-bottom: 5px; font-size: 14px; }
+    select, textarea { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; outline: none; transition: 0.3s; font-size: 14px; }
+    select:focus, textarea:focus { border-color: #f1c40f; box-shadow: 0 0 0 3px rgba(241, 196, 15, 0.1); }
+
+    textarea { height: 100px; resize: vertical; }
+    .btn-submit { background: #f1c40f; color: #2c3e50; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 20px; width: 100%; transition: 0.3s; font-size: 16px; }
+    .btn-submit:hover { background: #d4ae00; }
+
+    .rating-star { color: #f1c40f; font-size: 1.2rem; margin-bottom: 8px; }
+    .back-link { text-decoration: none; color: #3b82f6; font-weight: 500; display: inline-block; margin-bottom: 20px; }
+    h2, h3 { color: #0f172a; }
+    .reviewer-name { font-weight: 700; color: #334155; }
   </style>
 </head>
 <body>
 
 <div class="review-container">
+  <a href="../index.html" class="back-link">← Back to Dashboard</a>
   <h2>Reviews & Feedback</h2>
 
   <div class="add-review-card">
     <h3>Rate a Swapper</h3>
+
     <label>Select User to Review</label>
     <select id="reviewee-id">
+      <option value="">-- Select a User --</option>
     </select>
 
     <label>Rating</label>
@@ -34,7 +58,7 @@
     </select>
 
     <label>Comment</label>
-    <textarea id="review-comment" placeholder="Share your experience..."></textarea>
+    <textarea id="review-comment" placeholder="How was your skill swapping experience?"></textarea>
 
     <button class="btn-submit" onclick="submitReview()">Submit Review</button>
   </div>
@@ -44,56 +68,97 @@
   </div>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-  const loggedInUserId = 2; // දැනට අපි හිතමු ID 1 කියලා
 
   function loadUsers() {
-    $.get("http://localhost:8080/api/v1/user/all", function(res) {
-      res.data.forEach(u => {
-        if(u.id !== loggedInUserId) {
-          $("#reviewee-id").append(`<option value="${u.id}">${u.name}</option>`);
+    $.ajax({
+      url: "http://localhost:8080/api/v1/user/all",
+      method: "GET",
+      headers: { "Authorization": "Bearer " + token },
+      success: function(res) {
+        const select = $("#reviewee-id");
+        if(res.data) {
+          res.data.forEach(u => {
+
+            if(u.id != loggedInUserId) {
+              select.append(`<option value="${u.id}">${u.name}</option>`);
+            }
+          });
         }
-      });
+      },
+      error: function(err) {
+        console.error("User load failed:", err);
+      }
     });
   }
+
 
   function loadMyReviews() {
-    $.get("http://localhost:8080/api/v1/review/user/" + loggedInUserId, function(res) {
-      $("#reviews-list").empty();
-      if(res.data.length === 0) {
-        $("#reviews-list").append("<p>No reviews yet.</p>");
-        return;
+    $.ajax({
+      url: "http://localhost:8080/api/v1/review/user/" + loggedInUserId,
+      method: "GET",
+      headers: { "Authorization": "Bearer " + token },
+      success: function(res) {
+        const list = $("#reviews-list").empty();
+        if(!res.data || res.data.length === 0) {
+          list.append("<p style='text-align:center; color:#64748b; padding:20px; background:white; border-radius:12px;'>No reviews yet. Start swapping to get feedback!</p>");
+          return;
+        }
+        res.data.forEach(r => {
+          let stars = "⭐".repeat(r.rating);
+          list.append(`
+                        <div class="review-list-card">
+                            <div class="rating-star">${stars}</div>
+                            <p><span class="reviewer-name">Reviewer: ${r.reviewerName || 'Anonymous'}</span></p>
+                            <p style="color: #475569; line-height: 1.5;">${r.comment || 'No comment provided.'}</p>
+                        </div>
+                    `);
+        });
+      },
+      error: function(err) {
+        console.error("Reviews load failed:", err);
+        if(err.status === 401) window.location.replace("login.html");
       }
-      res.data.forEach(r => {
-        let stars = "⭐".repeat(r.rating);
-        $("#reviews-list").append(`
-                    <div class="review-list-card">
-                        <div class="rating-star">${stars}</div>
-                        <p><strong>Reviewer : ${r.reviewerName}</strong></p>
-                        <p style="color: #555;">${r.comment}</p>
-                    </div>
-                `);
-      });
     });
   }
 
+
   function submitReview() {
+    const revieweeId = $("#reviewee-id").val();
+    const comment = $("#review-comment").val();
+
+    if(!revieweeId) {
+      alert("Please select a user to review!");
+      return;
+    }
+
+    if(!comment.trim()) {
+      alert("Please add a comment!");
+      return;
+    }
+
     const data = {
-      reviewerId: loggedInUserId,
-      revieweeId: $("#reviewee-id").val(),
-      rating: $("#rating-value").val(),
-      comment: $("#review-comment").val()
+      reviewerId: parseInt(loggedInUserId),
+      revieweeId: parseInt(revieweeId),
+      rating: parseInt($("#rating-value").val()),
+      comment: comment
     };
 
     $.ajax({
       url: "http://localhost:8080/api/v1/review",
       method: "POST",
+      headers: { "Authorization": "Bearer " + token },
       contentType: "application/json",
       data: JSON.stringify(data),
       success: function() {
         alert("Review added successfully!");
+        $("#review-comment").val("");
+        $("#reviewee-id").val("");
         loadMyReviews();
+      },
+      error: function(err) {
+        alert("Error adding review. Please try again.");
+        console.error(err);
       }
     });
   }
