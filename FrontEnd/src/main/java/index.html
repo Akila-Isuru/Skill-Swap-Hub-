@@ -11,7 +11,7 @@
             const token = localStorage.getItem('token');
             const userId = localStorage.getItem('userId');
             if (!token || token === "null" || !userId || userId === "null" || userId === "undefined") {
-                window.location.replace("pages/login.html"); // replace() - back button block
+                window.location.replace("pages/login.html");
             }
         })();
     </script>
@@ -27,6 +27,7 @@
             --text-main: #0f172a;
             --text-muted: #64748b;
             --border-color: #e2e8f0;
+            --danger: #ef4444;
         }
         * { box-sizing: border-box; }
         body {
@@ -36,6 +37,8 @@
             display: flex;
             color: var(--text-main);
         }
+
+        /* Sidebar Styling */
         .sidebar {
             width: 280px;
             background: var(--sidebar-bg);
@@ -44,27 +47,58 @@
             padding: 30px 20px;
             display: flex;
             flex-direction: column;
+            overflow-y: auto;
         }
-        .sidebar h2 { color: white; margin-bottom: 40px; display: flex; align-items: center; gap: 10px; }
-        .nav-link { display: flex; align-items: center; color: #94a3b8; padding: 12px 15px; text-decoration: none; border-radius: 10px; transition: 0.2s; cursor: pointer; }
-        .nav-link:hover, .nav-link.active { background: var(--accent); color: white; }
-        .logout-btn { color: #f87171 !important; margin-top: auto; }
+        .sidebar h2 { color: white; margin-bottom: 30px; display: flex; align-items: center; gap: 10px; font-size: 22px; }
+
+        .nav-menu { flex: 1; }
+        .nav-label { color: #475569; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin: 20px 0 10px 10px; }
+
+        .nav-link { display: flex; align-items: center; color: #94a3b8; padding: 12px 15px; text-decoration: none; border-radius: 10px; transition: 0.2s; cursor: pointer; margin-bottom: 5px; font-size: 15px; }
+        .nav-link span { margin-right: 12px; font-size: 18px; }
+        .nav-link:hover, .nav-link.active { background: rgba(59, 130, 246, 0.1); color: var(--accent); }
+        .nav-link.active { background: var(--accent); color: white; }
+
+        .notif-badge { background: var(--danger); color: white; font-size: 10px; padding: 2px 6px; border-radius: 50%; margin-left: auto; }
+
+        .logout-btn { color: #f87171 !important; border: 1px solid rgba(248, 113, 113, 0.2); margin-top: 20px; }
+        .logout-btn:hover { background: rgba(248, 113, 113, 0.1) !important; }
+
+        /* Main Content Styling */
         .main-content { flex: 1; margin-left: 280px; padding: 50px 60px; max-width: 1400px; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 25px; }
-        .stat-card { background: var(--card-bg); padding: 25px; border-radius: 16px; border: 1px solid var(--border-color); }
-        .stat-card .value { font-size: 32px; font-weight: 700; margin-top: 15px; display: block; }
+        .header-section { margin-bottom: 40px; }
+        .header-section h1 { font-size: 32px; margin: 0; }
+        .header-section p { color: var(--text-muted); margin-top: 8px; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 25px; }
+        .stat-card { background: var(--card-bg); padding: 25px; border-radius: 20px; border: 1px solid var(--border-color); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); transition: 0.3s; }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        .stat-card h3 { margin: 0; color: var(--text-muted); font-size: 14px; font-weight: 600; text-transform: uppercase; }
+        .stat-card .value { font-size: 36px; font-weight: 800; margin-top: 15px; display: block; color: var(--text-main); }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
     <h2><span>🚀</span> SkillSwap</h2>
+
     <div class="nav-menu">
+        <div class="nav-label">Main Menu</div>
         <a href="index.html" class="nav-link active"><span>🏠</span> Dashboard</a>
+        <a href="pages/explore.html" class="nav-link"><span>🌍</span> Explore Feed</a>
+        <a href="pages/find-matches.html" class="nav-link"><span>🔍</span> Smart Matches</a>
+
+        <div class="nav-label">My Activity</div>
         <a href="pages/my-skills.html" class="nav-link"><span>📚</span> My Skills</a>
-        <a href="pages/explore.html" class="nav-link"><span>🌍</span> Explore</a>
-        <a href="pages/find-matches.html" class="nav-link"><span>🔍</span> Matches</a>
-        <a href="pages/requests.html" class="nav-link"><span>📩</span> Requests</a>
+        <a href="pages/requests.html" class="nav-link"><span>📩</span> Swap Requests</a>
+        <a href="pages/notifications.html" class="nav-link"><span>🔔</span> Notifications <div class="notif-badge" id="notif-count">0</div></a>
+
+        <div class="nav-label">Community</div>
+        <a href="pages/leaderboard.html" class="nav-link"><span>🏆</span> Leaderboard</a>
+        <a href="pages/reviews.html" class="nav-link"><span>⭐</span> Reviews & Ratings</a>
+
+        <div class="nav-label">Settings</div>
+        <a href="pages/profile.html" class="nav-link"><span>👤</span> My Profile</a>
         <a onclick="logout()" class="nav-link logout-btn"><span>🚪</span> Logout</a>
     </div>
 </div>
@@ -78,7 +112,7 @@
     <div class="stats-grid">
         <div class="stat-card"><h3>Avg. Rating</h3><span class="value" id="stat-rating">0.0</span></div>
         <div class="stat-card"><h3>Active Skills</h3><span class="value" id="stat-skills">0</span></div>
-        <div class="stat-card"><h3>Pending Requests</h3><span class="value" id="stat-incoming">0</span></div>
+        <div class="stat-card"><h3>Incoming Swaps</h3><span class="value" id="stat-incoming">0</span></div>
         <div class="stat-card"><h3>Sent Requests</h3><span class="value" id="stat-outgoing">0</span></div>
     </div>
 </div>
@@ -90,6 +124,7 @@
     function loadUserSummary() {
         if (!token || !loggedInUserId) return;
 
+
         $.ajax({
             url: "http://localhost:8080/api/v1/user/summary/" + loggedInUserId,
             method: "GET",
@@ -98,25 +133,29 @@
                 if (res.code === 200) {
                     const data = res.data;
                     $("#welcome-msg").text("Welcome back, " + data.userName + "!");
-                    $("#user-bio").text(data.bio || "Keep swapping skills!");
+                    $("#user-bio").text(data.bio || "Share a skill, learn a skill today.");
                     $("#stat-rating").text(data.averageRating ? data.averageRating.toFixed(1) : "0.0");
                     $("#stat-skills").text(data.totalSkills || 0);
                     $("#stat-incoming").text(data.pendingIncomingRequests || 0);
                     $("#stat-outgoing").text(data.totalOutgoingRequests || 0);
+
+
+                    if(data.unreadNotifications > 0) {
+                        $("#notif-count").text(data.unreadNotifications).show();
+                    } else {
+                        $("#notif-count").hide();
+                    }
                 }
             },
             error: function(err) {
-                console.error("Summary Load Failed:", err);
-                if (err.status === 401 || err.status === 403) {
-                    logout();
-                }
+                if (err.status === 401 || err.status === 403) logout();
             }
         });
     }
 
     function logout() {
         localStorage.clear();
-        window.location.href = "pages/login.html";
+        window.location.replace("pages/login.html");
     }
 
     $(document).ready(loadUserSummary);
