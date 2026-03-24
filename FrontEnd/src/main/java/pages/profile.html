@@ -2,77 +2,112 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Profile - SkillSwap Hub</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+
+        const token = localStorage.getItem('token');
+        const loggedInUserId = localStorage.getItem('userId');
+
+        if (!token || !loggedInUserId || loggedInUserId === "undefined") {
+            window.location.replace("login.html");
+        }
+    </script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; padding: 20px; }
-        .profile-container { max-width: 600px; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin: auto; }
+        body { font-family: 'Inter', 'Segoe UI', sans-serif; background: #f4f7f6; padding: 20px; }
+        .profile-container { max-width: 600px; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin: 50px auto; }
         .form-group { margin-bottom: 20px; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; color: #34495e; }
-        input, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        textarea { height: 100px; resize: vertical; }
-        .btn-update { background: #3498db; color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; }
-        .btn-update:hover { background: #2980b9; }
-        .readonly-info { background: #eee; color: #7f8c8d; cursor: not-allowed; }
+        label { display: block; font-weight: 600; margin-bottom: 8px; color: #1e293b; font-size: 14px; }
+        input, textarea { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; font-size: 15px; outline: none; transition: 0.3s; }
+        input:focus, textarea:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+        textarea { height: 120px; resize: vertical; }
+        .btn-update { background: #3b82f6; color: white; border: none; padding: 14px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; transition: 0.3s; }
+        .btn-update:hover { background: #2563eb; }
+        .readonly-info { background: #f1f5f9; color: #64748b; cursor: not-allowed; }
+        .back-link { text-decoration: none; color: #3b82f6; font-weight: 500; display: inline-block; margin-bottom: 20px; }
+        h2 { margin: 0 0 20px 0; color: #0f172a; }
     </style>
 </head>
 <body>
 
 <div class="profile-container">
+    <a href="../index.html" class="back-link">← Back to Dashboard</a>
     <h2>My Profile Settings</h2>
-    <hr>
+    <hr style="border: 0; border-top: 1px solid #e2e8f0; margin-bottom: 25px;">
+
     <div class="form-group">
         <label>Full Name</label>
-        <input type="text" id="profile-name">
+        <input type="text" id="profile-name" placeholder="Enter your full name">
     </div>
     <div class="form-group">
-        <label>Email (Cannot Change)</label>
+        <label>Email (Read Only)</label>
         <input type="email" id="profile-email" class="readonly-info" readonly>
     </div>
     <div class="form-group">
         <label>Bio</label>
-        <textarea id="profile-bio" placeholder="Tell us about yourself..."></textarea>
+        <textarea id="profile-bio" placeholder="Tell the community about your skills and interests..."></textarea>
     </div>
     <div class="form-group">
         <label>New Password (Leave blank to keep current)</label>
-        <input type="password" id="profile-password">
+        <input type="password" id="profile-password" placeholder="••••••••">
     </div>
     <button class="btn-update" onclick="updateProfile()">Update Profile</button>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    const loggedInUserId = 2; // දැනට පාවිච්චි කරන User ID එක
 
     function loadProfileData() {
-        $.get("http://localhost:8080/api/v1/user/" + loggedInUserId, function(res) {
-            if(res.data) {
-                $("#profile-name").val(res.data.name);
-                $("#profile-email").val(res.data.email);
-                $("#profile-bio").val(res.data.bio);
+        $.ajax({
+            url: "http://localhost:8080/api/v1/user/" + loggedInUserId,
+            method: "GET",
+            headers: { "Authorization": "Bearer " + token },
+            success: function(res) {
+                if(res.data) {
+                    $("#profile-name").val(res.data.name);
+                    $("#profile-email").val(res.data.email);
+                    $("#profile-bio").val(res.data.bio || "");
+                }
+            },
+            error: function(err) {
+                console.error("Failed to load profile:", err);
+                if (err.status === 401) window.location.replace("login.html");
             }
         });
     }
 
+
     function updateProfile() {
+        const passwordValue = $("#profile-password").val();
+
         const updatedData = {
-            id: loggedInUserId,
+            id: parseInt(loggedInUserId),
             name: $("#profile-name").val(),
             email: $("#profile-email").val(),
             bio: $("#profile-bio").val(),
-            password: $("#profile-password").val() || undefined // Password එක ගැහුවේ නැත්නම් ඒක යවන්නේ නැහැ
+            password: passwordValue && passwordValue.trim() !== "" ? passwordValue : null
         };
+
+        if (!updatedData.name) {
+            alert("Name cannot be empty!");
+            return;
+        }
 
         $.ajax({
             url: "http://localhost:8080/api/v1/user",
             method: "PUT",
+            headers: { "Authorization": "Bearer " + token },
             contentType: "application/json",
             data: JSON.stringify(updatedData),
-            success: function() {
+            success: function(res) {
                 alert("Profile Updated Successfully!");
+
+                localStorage.setItem('userName', updatedData.name);
                 window.location.reload();
             },
-            error: function() {
-                alert("Error updating profile.");
+            error: function(err) {
+                console.error("Update failed:", err);
+                alert("Error updating profile. Please try again.");
             }
         });
     }
