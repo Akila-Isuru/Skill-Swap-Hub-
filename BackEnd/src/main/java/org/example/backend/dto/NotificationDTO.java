@@ -11,6 +11,6 @@ public class NotificationDTO {
     private Long id;
     private String message;
     private String type;
-    private boolean isRead;
+    private boolean read;
     private String createdAt;
 }

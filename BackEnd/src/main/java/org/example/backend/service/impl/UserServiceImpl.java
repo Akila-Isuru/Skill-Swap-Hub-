@@ -112,7 +112,10 @@ public class UserServiceImpl implements UserService {
     public List<UserSummaryDTO> getTopRatedUsers() {
         return userRepository.findAll().stream()
                 .map(user -> getUserSummary(user.getId()))
-                .sorted((u1, u2) -> u2.getAverageRating().compareTo(u1.getAverageRating()))
+
+                .filter(summary -> summary.getAverageRating() > 0)
+
+                .sorted((u1, u2) -> Double.compare(u2.getAverageRating(), u1.getAverageRating()))
                 .limit(5)
                 .collect(Collectors.toList());
     }
