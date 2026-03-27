@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Profile - SkillSwap Hub</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    const token = localStorage.getItem('token');
+    const loggedInUserId = localStorage.getItem('userId');
+    if (!token || !loggedInUserId || loggedInUserId === "undefined") {
+      window.location.replace("login.html");
+    }
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f7f6;
+      padding: 30px 20px;
+      color: #1e293b;
+      margin: 0;
+    }
+
+    .back-link {
+      display: inline-block;
+      text-decoration: none;
+      color: #3b82f6;
+      font-weight: 500;
+      margin-bottom: 24px;
+      font-size: 15px;
+    }
+    .back-link:hover { text-decoration: underline; }
+
+    /* ---- Profile card ---- */
+    .profile-card {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      max-width: 700px;
+      margin: 0 auto 24px auto;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+      border: 1px solid #e2e8f0;
+    }
+
+    .profile-header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      color: white;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .profile-meta h2 {
+      margin: 0 0 6px 0;
+      font-size: 1.5rem;
+      color: #0f172a;
+    }
+    .profile-meta .email {
+      color: #64748b;
+      font-size: 14px;
+      margin: 0 0 8px 0;
+    }
+    .stars { color: #f59e0b; font-size: 16px; }
+    .rating-text { color: #64748b; font-size: 13px; margin-left: 6px; }
+
+    .bio-section {
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 14px 18px;
+      color: #475569;
+      font-size: 15px;
+      line-height: 1.6;
+      border: 1px solid #e2e8f0;
+    }
+    .bio-section.empty { color: #94a3b8; font-style: italic; }
+
+    /* ---- Stats row ---- */
+    .stats-row {
+      display: flex;
+      gap: 16px;
+      margin: 20px 0 0 0;
+    }
+    .stat-box {
+      flex: 1;
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+      border: 1px solid #e2e8f0;
+    }
+    .stat-box .val {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #0f172a;
+      display: block;
+    }
+    .stat-box .lbl {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 4px;
+      display: block;
+    }
+
+    /* ---- Skills section ---- */
+    .section-card {
+      background: white;
+      border-radius: 16px;
+      padding: 28px 32px;
+      max-width: 700px;
+      margin: 0 auto 24px auto;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+      border: 1px solid #e2e8f0;
+    }
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0 0 18px 0;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #f1f5f9;
+    }
+
+    .skill-group-label {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin: 14px 0 8px 0;
+    }
+    .skill-group-label.teach { color: #059669; }
+    .skill-group-label.learn { color: #3b82f6; }
+
+    .skills-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
+    .skill-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .skill-pill.teach {
+      background: #ecfdf5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+    }
+    .skill-pill.learn {
+      background: #eff6ff;
+      color: #1e40af;
+      border: 1px solid #bfdbfe;
+    }
+    .skill-pill .level {
+      font-size: 11px;
+      font-weight: 400;
+      opacity: 0.75;
+    }
+
+    /* ---- Send request button ---- */
+    .btn-swap {
+      display: block;
+      max-width: 700px;
+      margin: 0 auto;
+      width: 100%;
+      background: #f59e0b;
+      color: white;
+      border: none;
+      padding: 16px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .btn-swap:hover { background: #d97706; }
+    .btn-swap:disabled { background: #94a3b8; cursor: not-allowed; }
+
+    /* ---- Loading / error ---- */
+    .loading-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #94a3b8;
+      font-size: 16px;
+    }
+    .empty-skills {
+      color: #94a3b8;
+      font-style: italic;
+      font-size: 14px;
+      padding: 8px 0;
+    }
+
+    /* Hide initially */
+    #profile-content { display: none; }
+  </style>
+</head>
+<body>
+
+<a href="javascript:history.back()" class="back-link">← Back</a>
+
+<div id="loading-state" class="loading-state">Loading profile...</div>
+
+<div id="profile-content">
+
+  <!-- Profile card -->
+  <div class="profile-card">
+    <div class="profile-header">
+      <div class="avatar" id="avatar-initials">?</div>
+      <div class="profile-meta">
+        <h2 id="user-name">—</h2>
+        <p class="email" id="user-email">—</p>
+        <div>
+          <span class="stars" id="star-display">☆☆☆☆☆</span>
+          <span class="rating-text" id="rating-text">No ratings yet</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bio-section" id="user-bio">Loading...</div>
+
+    <div class="stats-row">
+      <div class="stat-box">
+        <span class="val" id="stat-rating">0.0</span>
+        <span class="lbl">Avg Rating</span>
+      </div>
+      <div class="stat-box">
+        <span class="val" id="stat-skills">0</span>
+        <span class="lbl">Total Skills</span>
+      </div>
+      <div class="stat-box">
+        <span class="val" id="stat-teach">0</span>
+        <span class="lbl">Can Teach</span>
+      </div>
+      <div class="stat-box">
+        <span class="val" id="stat-learn">0</span>
+        <span class="lbl">Wants to Learn</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Skills section -->
+  <div class="section-card">
+    <div class="section-title">Skills</div>
+    <div id="skills-container"><p class="empty-skills">No skills added yet.</p></div>
+  </div>
+
+  <!-- Send Swap Request button (hidden if viewing own profile) -->
+  <button class="btn-swap" id="btn-send-request" onclick="goToMatches()" style="display:none">
+    🔄 Send a Swap Request
+  </button>
+
+</div>
+
+<script>
+
+  const urlParams   = new URLSearchParams(window.location.search);
+  const viewUserId  = urlParams.get('userId');
+
+  if (!viewUserId) {
+    document.getElementById('loading-state').innerHTML =
+            '⚠️ No user specified. <a href="../index.html">Go home</a>';
+  }
+
+
+  function loadUserSummary() {
+    $.ajax({
+      url: "http://localhost:8080/api/v1/user/summary/" + viewUserId,
+      method: "GET",
+      headers: { "Authorization": "Bearer " + token },
+      success: function(res) {
+        if (res.code === 200 && res.data) {
+          const d = res.data;
+
+
+          const initials = d.userName
+                  ? d.userName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2)
+                  : '?';
+          $("#avatar-initials").text(initials);
+
+          $("#user-name").text(d.userName || "Unknown");
+          $("#user-email").text(d.email || "");
+          $("#user-bio").text(d.bio || "No bio provided.")
+                  .toggleClass("empty", !d.bio);
+
+
+          const rating = d.averageRating || 0;
+          $("#stat-rating").text(rating.toFixed(1));
+          $("#rating-text").text(rating > 0 ? rating.toFixed(1) + " / 5.0" : "No ratings yet");
+          renderStars(rating);
+
+
+          $("#stat-skills").text(d.totalSkills || 0);
+        }
+      },
+      error: handleError
+    });
+  }
+
+
+  function loadSkills() {
+    $.ajax({
+      url: "http://localhost:8080/api/v1/user-skill/user/" + viewUserId,
+      method: "GET",
+      headers: { "Authorization": "Bearer " + token },
+      success: function(res) {
+        const container = $("#skills-container").empty();
+        if (!res.data || res.data.length === 0) {
+          container.append('<p class="empty-skills">No skills added yet.</p>');
+          return;
+        }
+
+        const teachSkills = res.data.filter(s => s.type === 'TEACH');
+        const learnSkills = res.data.filter(s => s.type === 'LEARN');
+
+
+        $("#stat-teach").text(teachSkills.length);
+        $("#stat-learn").text(learnSkills.length);
+        $("#stat-skills").text(res.data.length);
+
+        if (teachSkills.length > 0) {
+          container.append('<div class="skill-group-label teach">✅ Can Teach</div>');
+          const teachWrap = $('<div class="skills-wrap"></div>');
+          teachSkills.forEach(s => {
+            teachWrap.append(`
+                            <span class="skill-pill teach">
+                                ${s.skillName}
+                                ${s.expertiseLevel ? '<span class="level">· ' + s.expertiseLevel + '</span>' : ''}
+                            </span>
+                        `);
+          });
+          container.append(teachWrap);
+        }
+
+        if (learnSkills.length > 0) {
+          container.append('<div class="skill-group-label learn">📘 Wants to Learn</div>');
+          const learnWrap = $('<div class="skills-wrap"></div>');
+          learnSkills.forEach(s => {
+            learnWrap.append(`
+                            <span class="skill-pill learn">
+                                ${s.skillName}
+                                ${s.expertiseLevel ? '<span class="level">· ' + s.expertiseLevel + '</span>' : ''}
+                            </span>
+                        `);
+          });
+          container.append(learnWrap);
+        }
+
+
+        if (String(viewUserId) !== String(loggedInUserId)) {
+          $("#btn-send-request").show();
+        }
+
+
+        $("#loading-state").hide();
+        $("#profile-content").show();
+      },
+      error: handleError
+    });
+  }
+
+
+  function renderStars(rating) {
+    const full  = Math.floor(rating);
+    const half  = rating - full >= 0.5 ? 1 : 0;
+    const empty = 5 - full - half;
+    let stars = '⭐'.repeat(full) + (half ? '✨' : '') + '☆'.repeat(empty);
+    $("#star-display").text(stars);
+  }
+
+
+  function goToMatches() {
+
+    window.location.href = "find-matches.html";
+  }
+
+
+  function handleError(err) {
+    if (err.status === 401) {
+      localStorage.clear();
+      window.location.replace("login.html");
+      return;
+    }
+    document.getElementById('loading-state').innerHTML =
+            '⚠️ Failed to load profile. <a href="javascript:history.back()">Go back</a>';
+  }
+
+  $(document).ready(function() {
+    if (viewUserId) {
+      loadUserSummary();
+      loadSkills();
+    }
+  });
+</script>
+</body>
+</html>

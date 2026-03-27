@@ -6,10 +6,8 @@
     <title>Swap Requests - SkillSwap Hub</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-
         const token = localStorage.getItem('token');
         const loggedInUserId = localStorage.getItem('userId');
-
         if (!token || !loggedInUserId || loggedInUserId === "undefined") {
             window.location.replace("login.html");
         }
@@ -21,11 +19,37 @@
         .tab { padding: 15px 30px; cursor: pointer; font-weight: 600; color: #64748b; transition: 0.3s; }
         .tab.active { color: #3b82f6; border-bottom: 3px solid #3b82f6; background: #eff6ff; }
 
-        .request-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #e2e8f0; }
+        .request-card {
+            background: white;
+            padding: 20px 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Clickable user name link */
+        .user-link {
+            color: #1e293b;
+            font-weight: 700;
+            text-decoration: none;
+            border-bottom: 2px solid #3b82f6;
+            transition: 0.2s;
+            padding-bottom: 1px;
+        }
+        .user-link:hover {
+            color: #3b82f6;
+            border-bottom-color: #2563eb;
+        }
+
         .status-badge { padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
-        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-pending  { background: #fef3c7; color: #92400e; }
         .status-accepted { background: #dcfce7; color: #166534; }
         .status-rejected { background: #fee2e2; color: #991b1b; }
+        .status-completed{ background: #e0e7ff; color: #3730a3; }
 
         .btn-accept { background: #22c55e; color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-right: 8px; transition: 0.2s; }
         .btn-accept:hover { background: #16a34a; }
@@ -34,7 +58,9 @@
 
         .back-link { text-decoration: none; color: #3b82f6; font-weight: 500; display: inline-block; margin-bottom: 20px; }
         .user-label { font-size: 16px; color: #0f172a; margin-bottom: 5px; display: block; }
-        .msg-text { color: #64748b; font-size: 14px; margin: 8px 0; font-style: italic; }
+        .msg-text { color: #64748b; font-size: 14px; margin: 6px 0; font-style: italic; }
+        .skill-name { color: #0f172a; font-weight: 700; font-style: normal; }
+        .empty-state { text-align:center; padding:40px; color:#64748b; background:white; border-radius:12px; border: 1px solid #e2e8f0; }
     </style>
 </head>
 <body>
@@ -48,8 +74,7 @@
         <div class="tab" id="tab-outgoing" onclick="switchTab('outgoing')">Outgoing Requests</div>
     </div>
 
-    <div id="requests-container">
-    </div>
+    <div id="requests-container"></div>
 </div>
 
 <script>
@@ -58,14 +83,12 @@
     function switchTab(tab) {
         currentTab = tab;
         $(".tab").removeClass("active");
-        if (tab === 'incoming') $("#tab-incoming").addClass("active");
-        else $("#tab-outgoing").addClass("active");
+        $("#tab-" + tab).addClass("active");
         loadRequests();
     }
 
     function loadRequests() {
-
-        const url = `http://localhost:8080/api/v1/swap/${currentTab}/${loggedInUserId}`;
+        const url = "http://localhost:8080/api/v1/swap/" + currentTab + "/" + loggedInUserId;
 
         $.ajax({
             url: url,
@@ -73,33 +96,50 @@
             headers: { "Authorization": "Bearer " + token },
             success: function(res) {
                 const container = $("#requests-container").empty();
-                if(!res.data || res.data.length === 0) {
-                    container.append("<div style='text-align:center; padding:40px; color:#64748b; background:white; border-radius:12px;'>No requests found in this section.</div>");
+
+                if (!res.data || res.data.length === 0) {
+                    container.append('<div class="empty-state">No requests found in this section.</div>');
                     return;
                 }
 
                 res.data.forEach(r => {
                     let actionButtons = '';
-                    let statusClass = `status-${r.status.toLowerCase()}`;
+                    let statusClass   = "status-" + r.status.toLowerCase();
 
-
-                    if(currentTab === 'incoming' && r.status === 'PENDING') {
+                    if (currentTab === 'incoming' && r.status === 'PENDING') {
                         actionButtons = `
-                            <div>
+                            <div style="display:flex; gap:8px;">
                                 <button class="btn-accept" onclick="updateStatus(${r.id}, 'ACCEPTED')">Accept</button>
                                 <button class="btn-reject" onclick="updateStatus(${r.id}, 'REJECTED')">Reject</button>
                             </div>`;
                     }
 
-                    let personLabel = currentTab === 'incoming'
-                        ? `From: <strong>${r.senderName || 'User ' + r.senderId}</strong>`
-                        : `Sent To: <strong>${r.receiverName || 'User ' + r.receiverId}</strong>`;
+                    // ---- KEY CHANGE: name is now a clickable link ----
+                    let personLabel;
+                    if (currentTab === 'incoming') {
+                        // Sender name → click → sender's profile
+                        const senderName = r.senderName || 'User ' + r.senderId;
+                        personLabel = `From: <a class="user-link"
+                            href="user-profile.html?userId=${r.senderId}"
+                            title="View ${senderName}'s profile">${senderName}</a>`;
+                    } else {
+                        // Receiver name → click → receiver's profile
+                        const receiverName = r.receiverName || 'User ' + r.receiverId;
+                        personLabel = `Sent To: <a class="user-link"
+                            href="user-profile.html?userId=${r.receiverId}"
+                            title="View ${receiverName}'s profile">${receiverName}</a>`;
+                    }
+
+                    // Skill name — bold, no italic
+                    const skillDisplay = r.skillName
+                        ? `<span class="skill-name">${r.skillName}</span>`
+                        : '<em>Unknown skill</em>';
 
                     container.append(`
                         <div class="request-card">
                             <div>
                                 <span class="user-label">${personLabel}</span>
-                                <p class="msg-text">Skill Requested: <strong>${r.skillName || 'Skill ID: ' + r.skillId}</strong></p>
+                                <p class="msg-text">Skill Requested: ${skillDisplay}</p>
                                 <p class="msg-text">Message: ${r.message || 'No message provided'}</p>
                                 <span class="status-badge ${statusClass}">${r.status}</span>
                             </div>
@@ -116,10 +156,10 @@
     }
 
     function updateStatus(requestId, newStatus) {
-        if (!confirm(`Are you sure you want to ${newStatus.toLowerCase()} this request?`)) return;
+        if (!confirm("Are you sure you want to " + newStatus.toLowerCase() + " this request?")) return;
 
         $.ajax({
-            url: `http://localhost:8080/api/v1/swap/status/${requestId}/${newStatus}`,
+            url: "http://localhost:8080/api/v1/swap/status/" + requestId + "/" + newStatus,
             method: "PUT",
             headers: { "Authorization": "Bearer " + token },
             success: function() {
