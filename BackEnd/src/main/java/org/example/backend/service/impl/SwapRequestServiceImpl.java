@@ -45,7 +45,7 @@ public class SwapRequestServiceImpl implements SwapRequestService {
 
         swapRequestRepository.save(request);
 
-        // Receiver ta notification dennawa
+
         notificationService.createNotification(
                 receiver.getId(),
                 sender.getName() + " sent you a swap request!",
@@ -62,13 +62,15 @@ public class SwapRequestServiceImpl implements SwapRequestService {
         request.setStatus(newStatus);
         swapRequestRepository.save(request);
 
-        // Status change notification - sender ta kiyannawa
+
         String notifMsg;
         if (newStatus == RequestStatus.ACCEPTED) {
-            notifMsg = request.getReceiver().getName() + " accepted your swap request!";
+
+            notifMsg = request.getReceiver().getName() + " accepted your swap request! You can now start chatting.";
         } else {
             notifMsg = request.getReceiver().getName() + " declined your swap request.";
         }
+
         notificationService.createNotification(request.getSender().getId(), notifMsg, "SWAP");
     }
 
@@ -94,40 +96,34 @@ public class SwapRequestServiceImpl implements SwapRequestService {
                 .collect(Collectors.toList());
     }
 
-    // -------------------------------------------------------
-    // Helper: SwapRequest -> SwapRequestDTO properly map karannawa
-    // senderName, receiverName, skillName set karanawa
-    // -------------------------------------------------------
+
     private SwapRequestDTO mapToDTO(SwapRequest req) {
         SwapRequestDTO dto = new SwapRequestDTO();
         dto.setId(req.getId());
 
         // Sender info
         dto.setSenderId(req.getSender().getId());
-        dto.setSenderName(req.getSender().getName());   // FIX: "User 1" wenuwata real name
+        dto.setSenderName(req.getSender().getName());
 
-        // Receiver info
+
         dto.setReceiverId(req.getReceiver().getId());
         dto.setReceiverName(req.getReceiver().getName());
 
         dto.setMessage(req.getMessage());
         dto.setStatus(req.getStatus().name());
 
-        // FIX: skillName - message eken extract karanawa
-        // message format: "I want to swap skills with you for <SkillName>"
-        // Entity eke skillId field naha, so message parse karanna
+
         dto.setSkillName(extractSkillNameFromMessage(req.getMessage()));
 
         return dto;
     }
 
-    // "I want to swap skills with you for Photography Basics" -> "Photography Basics"
     private String extractSkillNameFromMessage(String message) {
         if (message == null) return "Unknown Skill";
         String prefix = "I want to swap skills with you for ";
         if (message.startsWith(prefix)) {
             return message.substring(prefix.length()).trim();
         }
-        return message; // message format different nam whole message return
+        return message;
     }
 }
