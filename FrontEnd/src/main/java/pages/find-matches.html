@@ -14,78 +14,220 @@
     </script>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; padding: 20px; }
-        .match-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; border: 1px solid #eef2f7; }
+        .page-header { margin-bottom: 10px; }
+        .page-header h2 { margin: 0 0 6px 0; color: #1e293b; }
+        .page-header p  { margin: 0; color: #64748b; font-size: 14px; }
+
+        /* Mode badge shown when coming from explore */
+        .mode-badge {
+            display: inline-block;
+            background: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+            border-radius: 20px;
+            padding: 4px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 18px;
+        }
+
+        .match-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.2s;
+            border: 1px solid #eef2f7;
+        }
         .match-card:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.1); }
-        .user-info h3 { margin: 0; color: #1e293b; font-size: 1.2rem; }
-        .user-info p { margin: 10px 0; color: #64748b; font-size: 14px; }
-        .skill-tag { background: #3b82f6; color: white; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; }
-        .btn-request { background: #f59e0b; color: white; border: none; padding: 12px 22px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .user-info h3 { margin: 0 0 6px 0; color: #1e293b; font-size: 1.1rem; }
+        .user-info p  { margin: 6px 0 0 0; color: #64748b; font-size: 14px; }
+
+        .skill-tag {
+            background: #3b82f6;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .level-tag {
+            background: #f0fdf4;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .btn-request {
+            background: #f59e0b;
+            color: white;
+            border: none;
+            padding: 12px 22px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+            white-space: nowrap;
+        }
         .btn-request:hover { background: #d97706; }
-        .back-link { margin-bottom: 20px; display: inline-block; text-decoration: none; color: #3b82f6; font-weight: 500; }
-        .no-matches { text-align: center; padding: 40px; color: #64748b; background: white; border-radius: 12px; }
+        .btn-request:disabled { background: #94a3b8; cursor: not-allowed; }
+
+        .back-link {
+            margin-bottom: 20px;
+            display: inline-block;
+            text-decoration: none;
+            color: #3b82f6;
+            font-weight: 500;
+        }
+        .no-matches {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #eef2f7;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #94a3b8;
+            background: white;
+            border-radius: 12px;
+        }
     </style>
 </head>
 <body>
 
 <a href="../index.html" class="back-link">← Back to Dashboard</a>
 
-<h2>Potential Skill Swappers</h2>
-<p style="color: #64748b;">ඔබ ඉගෙන ගැනීමට කැමති දේ ඉගැන්වීමට හැකි පුද්ගලයින් මෙහි දැක්වේ.</p>
-
-<div id="matches-container">
+<div class="page-header">
+    <h2 id="page-title">Potential Skill Swappers</h2>
+    <p id="page-subtitle">ඔබ ඉගෙන ගැනීමට කැමති දේ ඉගැන්වීමට හැකි පුද්ගලයින් මෙහි දැක්වේ.</p>
 </div>
 
+<div id="mode-indicator"></div>
+<div id="matches-container"><div class="loading">Loading matches...</div></div>
+
 <script>
+    // ---- URL param check ----
+    // explore.html passes ?skill=89 when user clicks "Find Partners" for a specific skill.
+    // In that case we search by skillId directly.
+    // Without the param we fall back to the user's LEARN list (original behaviour).
+
+    const urlParams  = new URLSearchParams(window.location.search);
+    const skillIdParam = urlParams.get('skill');   // e.g. "89" or null
+
+    function init() {
+        if (skillIdParam) {
+            // Mode: came from Explore — show everyone who can TEACH this skill
+            loadBySkill(parseInt(skillIdParam));
+        } else {
+            // Mode: normal Smart Match — use logged-in user's LEARN list
+            loadMatches();
+        }
+    }
+
+    // ---- Mode 1: skill-specific (from Explore) ----
+    function loadBySkill(skillId) {
+        $.ajax({
+            url: "http://localhost:8080/api/v1/user-skill/by-skill/" + skillId,
+            method: "GET",
+            headers: { "Authorization": "Bearer " + token },
+            success: function(res) {
+                // Update header to show which skill we're browsing
+                const skillName = (res.data && res.data.length > 0) ? res.data[0].skillName : "this skill";
+                $("#page-title").text("People who can teach: " + skillName);
+                $("#page-subtitle").text("Send a swap request to learn from them!");
+                $("#mode-indicator").html(
+                    '<span class="mode-badge">🔍 Browsing from Explore: ' + skillName + '</span>'
+                );
+
+                renderMatches(res.data, skillId);
+            },
+            error: handleError
+        });
+    }
+
+    // ---- Mode 2: LEARN-list based matching (original) ----
     function loadMatches() {
         $.ajax({
             url: "http://localhost:8080/api/v1/user-skill/matches/" + loggedInUserId,
             method: "GET",
             headers: { "Authorization": "Bearer " + token },
             success: function(res) {
-                const container = $("#matches-container").empty();
-
-                if(!res.data || res.data.length === 0) {
-                    container.append(`
-                        <div class="no-matches">
-                            <p>No matches found yet. Try adding more skills to your <strong>'Learn'</strong> list in My Skills!</p>
-                        </div>
-                    `);
-                    return;
-                }
-
-                res.data.forEach(m => {
-                    container.append(`
-                        <div class="match-card">
-                            <div class="user-info">
-                                <h3>${m.userName}</h3>
-                                <p>Can teach you: <span class="skill-tag">${m.skillName}</span></p>
-                            </div>
-                            <button class="btn-request" onclick="sendSwapRequest(${m.userId}, ${m.skillId}, '${m.skillName}', '${m.userName}')">
-                                Send Swap Request
-                            </button>
-                        </div>
-                    `);
-                });
+                renderMatches(res.data, null);
             },
-            error: function(err) {
-                if (err.status === 401) {
-                    localStorage.clear();
-                    window.location.replace("login.html");
-                }
-                console.error("Match load failed:", err);
-            }
+            error: handleError
         });
     }
 
-    // මචං මේ function එක විතරයි තියෙන්න ඕනේ
+    // ---- Render ----
+    function renderMatches(data, overrideSkillId) {
+        const container = $("#matches-container").empty();
+
+        if (!data || data.length === 0) {
+            container.append(`
+                <div class="no-matches">
+                    <p style="font-size:2rem; margin-bottom:10px;">🤔</p>
+                    <p><strong>No matches found.</strong></p>
+                    <p style="margin-top:8px;">
+                        ${skillIdParam
+                ? 'Nobody is offering to teach this skill yet.'
+                : 'Try adding more skills to your <strong>\'Learn\'</strong> list in My Skills!'}
+                    </p>
+                </div>
+            `);
+            return;
+        }
+
+        data.forEach(m => {
+            // Filter out the logged-in user themselves
+            if (String(m.userId) === String(loggedInUserId)) return;
+
+            const levelTag = m.expertiseLevel
+                ? `<span class="level-tag">${m.expertiseLevel}</span>` : '';
+
+            container.append(`
+                <div class="match-card">
+                    <div class="user-info">
+                        <h3>${m.userName}</h3>
+                        <p>Can teach you:
+                            <span class="skill-tag">${m.skillName}</span>
+                            ${levelTag}
+                        </p>
+                    </div>
+                    <button class="btn-request"
+                        onclick="sendSwapRequest(${m.userId}, ${overrideSkillId || m.skillId}, '${m.skillName}', '${m.userName}')">
+                        Send Swap Request
+                    </button>
+                </div>
+            `);
+        });
+
+        // If all cards were filtered (only self), show no-matches
+        if (container.children().length === 0) {
+            container.append(`<div class="no-matches"><p>No other users found for this skill.</p></div>`);
+        }
+    }
+
+    // ---- Send swap request ----
     function sendSwapRequest(toUserId, skillId, skillName, toUserName) {
-        console.log("Attempting to send request to:", toUserId);
+        // Disable all buttons to avoid double-click
+        $(".btn-request").prop("disabled", true);
 
         const requestData = {
-            senderId: parseInt(loggedInUserId),
+            senderId:   parseInt(loggedInUserId),
             receiverId: parseInt(toUserId),
-            message: "I want to swap skills with you for " + skillName,
-            status: "PENDING"
+            message:    "I want to swap skills with you for " + skillName,
+            status:     "PENDING"
         };
 
         $.ajax({
@@ -96,19 +238,32 @@
                 "Content-Type": "application/json"
             },
             data: JSON.stringify(requestData),
-            success: function(res) {
-                alert(`Success! Swap request sent to ${toUserName} for '${skillName}'.`);
+            success: function() {
+                alert(`✅ Swap request sent to ${toUserName} for '${skillName}'!`);
+                $(".btn-request").prop("disabled", false);
             },
             error: function(err) {
                 console.error("Swap request failed:", err);
-                alert("Failed to send swap request. Check console for details.");
+                alert("❌ Failed to send swap request. Please try again.");
+                $(".btn-request").prop("disabled", false);
             }
         });
     }
 
-    $(document).ready(function() {
-        loadMatches();
-    });
+    // ---- Error handler ----
+    function handleError(err) {
+        if (err.status === 401) {
+            localStorage.clear();
+            window.location.replace("login.html");
+            return;
+        }
+        $("#matches-container").html(
+            '<div class="no-matches"><p>⚠️ Failed to load matches. Please try again.</p></div>'
+        );
+        console.error("Load failed:", err);
+    }
+
+    $(document).ready(init);
 </script>
 </body>
 </html>

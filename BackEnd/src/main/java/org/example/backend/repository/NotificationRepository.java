@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
     List<Notification> findByUserOrderByCreatedAtDesc(User user);
-    long countByUserAndIsReadFalse(User user); // නොබලපු notifications ගණන ගන්න
+    long countByUserAndIsReadFalse(User user);
 }

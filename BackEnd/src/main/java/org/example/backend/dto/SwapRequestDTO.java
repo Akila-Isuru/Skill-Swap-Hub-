@@ -10,8 +10,11 @@ import lombok.NoArgsConstructor;
 public class SwapRequestDTO {
     private Long id;
     private Long senderId;
+    private String senderName;
     private Long receiverId;
+    private String receiverName;
     private String message;
     private String status;
     // PENDING, ACCEPTED, REJECTED, COMPLETED
+    private String skillName;
 }

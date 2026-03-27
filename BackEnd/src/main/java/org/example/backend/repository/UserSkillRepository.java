@@ -19,7 +19,7 @@ public interface UserSkillRepository extends JpaRepository<UserSkill, Long> {
             "ORDER BY skillCount DESC")
     List<Object[]> findTrendingSkills();
 
-    // UserSkillRepository.java
+
     @Query("SELECT us FROM UserSkill us WHERE us.skill.id IN :skillIds AND us.type = :type AND us.user.id != :userId")
     List<UserSkill> findMatches(@Param("skillIds") List<Long> skillIds, @Param("type") SkillType type, @Param("userId") Long userId);
 }

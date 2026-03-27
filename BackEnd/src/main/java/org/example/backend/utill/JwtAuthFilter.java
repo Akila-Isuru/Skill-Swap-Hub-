@@ -30,7 +30,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         final String authHeader = request.getHeader("Authorization");
 
-        // Authorization header නැත්නම් හෝ Bearer නෙමෙයිනම් skip
+
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
@@ -39,7 +39,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         final String jwtToken = authHeader.substring(7);
         final String userEmail = jwtUtil.extractUsername(jwtToken);
 
-        // Token valid, context එකේ auth නැත්නම් set කරනවා
+
         if (userEmail != null &&
                 SecurityContextHolder.getContext().getAuthentication() == null) {
 

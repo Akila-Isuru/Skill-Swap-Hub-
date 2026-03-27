@@ -44,8 +44,8 @@ public class UserServiceImpl implements UserService {
                 .name(userDTO.getName())
                 .email(userDTO.getEmail())
                 .bio(userDTO.getBio())
-                .password(passwordEncoder.encode(userDTO.getPassword())) // Password Hash කරනවා
-                .role(Role.USER) // Default USER role එක දෙනවා
+                .password(passwordEncoder.encode(userDTO.getPassword()))
+                .role(Role.USER)
                 .build();
 
         userRepository.save(user);

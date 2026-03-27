@@ -34,7 +34,7 @@ function loginUser() {
         contentType: "application/json",
         data: JSON.stringify(authData),
         success: function (res) {
-            console.log("Full Response:", res);  // ← මේක තියෙනවා
+            console.log("Full Response:", res);
 
             if (res.code === 200 || res.code === 201) {
                 const token = res.data.access_token;
@@ -42,7 +42,7 @@ function loginUser() {
                 localStorage.setItem('userId', String(res.data.userId));
                 localStorage.setItem('userName', res.data.userName);
 
-                // alert එක මේ විදිහට change කරන්න
+
                 console.log("Token saved:", localStorage.getItem('token'));
                 console.log("UserId saved:", localStorage.getItem('userId'));
 

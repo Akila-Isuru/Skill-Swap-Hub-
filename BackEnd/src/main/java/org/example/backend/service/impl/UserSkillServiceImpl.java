@@ -109,4 +109,21 @@ public class UserSkillServiceImpl implements UserSkillService {
                     return dto;
                 }).collect(Collectors.toList());
     }
+
+    @Override
+    public List<UserSkillDTO> getUsersTeachingSkill(Long skillId) {
+        return userSkillRepository.findAll().stream()
+                .filter(us -> us.getSkill().getId().equals(skillId)
+                        && us.getType() == SkillType.TEACH)
+                .map(us -> {
+                    UserSkillDTO dto = new UserSkillDTO();
+                    dto.setUserId(us.getUser().getId());
+                    dto.setUserName(us.getUser().getName());
+                    dto.setSkillId(us.getSkill().getId());
+                    dto.setSkillName(us.getSkill().getSkillName());
+                    dto.setExpertiseLevel(us.getExpertiseLevel());
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
 }

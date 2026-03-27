@@ -20,7 +20,7 @@ public class MatchServiceImpl implements MatchService {
 
     @Override
     public List<MatchDTO> getMatchesForUser(Long userId) {
-        // 1. User ඉගෙන ගන්න කැමති (LEARN) skills ටික ගන්න
+
         List<UserSkill> userLearningSkills = userSkillRepository.findAll().stream()
                 .filter(us -> us.getUser().getId().equals(userId) && us.getType().name().equals("LEARN"))
                 .toList();
@@ -28,11 +28,11 @@ public class MatchServiceImpl implements MatchService {
         List<MatchDTO> matches = new ArrayList<>();
 
         for (UserSkill learningSkill : userLearningSkills) {
-            // 2. ඒ skill එකම TEACH කරන අනිත් අයව database එකෙන් හොයන්න
+
             List<UserSkill> potentialTeachers = userSkillRepository.findAll().stream()
                     .filter(us -> us.getSkill().getId().equals(learningSkill.getSkill().getId())
                             && us.getType().name().equals("TEACH")
-                            && !us.getUser().getId().equals(userId)) // තමන්වම match වෙන්න බැහැ
+                            && !us.getUser().getId().equals(userId))
                     .toList();
 
             for (UserSkill teacher : potentialTeachers) {

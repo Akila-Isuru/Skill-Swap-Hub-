@@ -9,4 +9,5 @@ public interface UserSkillService {
     List<UserSkillDTO> getSkillsByUserId(Long userId);
     void deleteUserSkill(Long id);
     List<UserSkillDTO> findMatchesForUser(Long userId);
+    List<UserSkillDTO> getUsersTeachingSkill(Long skillId);
 }
