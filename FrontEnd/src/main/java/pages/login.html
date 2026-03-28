@@ -1,22 +1,240 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Login - Skill Swap Hub</title>
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In — SkillSwap Hub</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,700;0,900;1,300;1,700&family=Cabinet+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --white: #ffffff;
+      --off: #f7f6f2;
+      --off2: #eeecea;
+      --ink: #0e0d0b;
+      --ink2: #3d3b36;
+      --accent: #ff5c35;
+      --blue: #3b6ef8;
+      --rl: 28px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Cabinet Grotesk', sans-serif;
+      background: var(--off);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Background Mesh + Orbs */
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 70% 40%, rgba(255,92,53,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 20% 70%, rgba(59,110,248,0.07) 0%, transparent 55%);
+      animation: meshShift 14s ease-in-out infinite alternate;
+      z-index: 0;
+    }
+
+    @keyframes meshShift {
+      0% { background-position: 0% 0%, 100% 100%; }
+      100% { background-position: 10% 10%, 90% 90%; }
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(70px);
+      opacity: 0.35;
+      z-index: 0;
+      animation: orbFloat 22s ease-in-out infinite;
+    }
+    .orb1 { width: 380px; height: 380px; background: rgba(255,92,53,.18); top: -80px; left: -80px; animation-duration: 26s; }
+    .orb2 { width: 260px; height: 260px; background: rgba(59,110,248,.14); bottom: -60px; right: -100px; animation-duration: 32s; animation-delay: -8s; }
+
+    @keyframes orbFloat {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-40px) scale(1.08); }
+    }
+
+    .auth-card-wrap {
+      position: relative;
+      z-index: 2;
+      width: 400px;
+      animation: fadeUp 0.9s ease both;
+    }
+
+    .auth-card {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(20px);
+      padding: 52px 44px;
+      border-radius: var(--rl);
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 30px 80px rgba(0,0,0,0.12),
+      0 0 0 1px rgba(255,255,255,0.6) inset;
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .auth-card:hover {
+      transform: translateY(-8px);
+    }
+
+    .auth-card h2 {
+      font-family: 'Fraunces', serif;
+      font-size: 42px;
+      font-weight: 900;
+      text-align: center;
+      margin-bottom: 12px;
+      letter-spacing: -1px;
+    }
+
+    .auth-card p {
+      text-align: center;
+      color: var(--ink2);
+      font-size: 15.5px;
+      margin-bottom: 36px;
+      line-height: 1.5;
+    }
+
+    .input-group {
+      margin-bottom: 22px;
+      position: relative;
+    }
+
+    input {
+      width: 100%;
+      padding: 16px 20px;
+      border-radius: 16px;
+      border: 1px solid rgba(0,0,0,0.09);
+      background: white;
+      font-size: 15.5px;
+      transition: all 0.3s ease;
+    }
+
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(255,92,53,0.12);
+      transform: translateY(-1px);
+    }
+
+    button {
+      width: 100%;
+      padding: 17px;
+      border-radius: 100px;
+      background: var(--ink);
+      color: white;
+      border: none;
+      font-weight: 800;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 8px;
+      box-shadow: 0 6px 20px rgba(14,13,11,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      position: relative;
+    }
+
+    button:hover:not(:disabled) {
+      background: var(--accent);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(255,92,53,0.35);
+    }
+
+    button:disabled {
+      background: #666;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Loading Spinner */
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .footer-link {
+      text-align: center;
+      margin-top: 32px;
+      font-size: 14.5px;
+      color: var(--ink2);
+    }
+
+    .footer-link a {
+      color: var(--accent);
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
 <body>
-<h2>Login</h2>
-<input type="email" id="loginEmail" placeholder="Email"><br>
-<input type="password" id="loginPassword" placeholder="Password"><br>
-<button onclick="loginUser()">Login</button>
-<p>New here? <a href="register.html">Register now</a></p>
 
+<div class="hero-bg"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<div class="auth-card-wrap">
+  <div class="auth-card">
+    <h2>Welcome back</h2>
+    <p>Continue swapping skills and growing together</p>
+
+    <div class="input-group">
+      <input type="email" id="loginEmail" placeholder="Email Address" required>
+    </div>
+    <div class="input-group">
+      <input type="password" id="loginPassword" placeholder="Password" required>
+    </div>
+
+    <button id="loginBtn" onclick="loginUser()">
+      <span id="btnText">Sign In →</span>
+    </button>
+
+    <div class="footer-link">
+      New to SkillSwap? <a href="register.html">Create an account</a>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
+  const loginBtn = document.getElementById('loginBtn');
+  const btnText = document.getElementById('btnText');
+
   function loginUser() {
-    const authData = {
-      email: $('#loginEmail').val(),
-      password: $('#loginPassword').val()
-    };
+    const email = $('#loginEmail').val().trim();
+    const password = $('#loginPassword').val().trim();
+
+    if (!email || !password) {
+      alert("Please fill in all fields");
+      return;
+    }
+
+    // Show loading state
+    loginBtn.disabled = true;
+    btnText.innerHTML = `<span class="spinner"></span> Signing in...`;
+
+    const authData = { email, password };
 
     $.ajax({
       url: "http://localhost:8080/api/v1/auth/login",
@@ -28,15 +246,31 @@
           localStorage.setItem('token', res.data.access_token);
           localStorage.setItem('userId', String(res.data.userId));
           localStorage.setItem('userName', res.data.userName);
-
           window.location.replace("../index.html");
         }
       },
-      error: function(err) {
-        alert("Invalid Credentials!");
+      error: function() {
+        alert("Invalid email or password. Please try again.");
+        // Reset button
+        resetButton();
+      },
+      complete: function() {
+        if (!document.getElementById('loginBtn').disabled) {
+          resetButton(); // In case of very fast response
+        }
       }
     });
   }
+
+  function resetButton() {
+    loginBtn.disabled = false;
+    btnText.textContent = "Sign In →";
+  }
+
+  // Enter key support
+  document.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') loginUser();
+  });
 </script>
 </body>
 </html>

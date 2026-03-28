@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Core Features — SkillSwap Hub</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,700;0,900;1,300;1,700&family=Cabinet+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root { --white: #ffffff; --off: #f7f6f2; --ink: #0e0d0b; --ink2: #3d3b36; --accent: #ff5c35; --rl: 32px; }
+    body { font-family: 'Cabinet Grotesk', sans-serif; background: white; color: var(--ink); margin: 0; padding: 0; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 120px 40px; }
+    h1 { font-family: 'Fraunces', serif; font-size: 60px; font-weight: 900; margin-bottom: 80px; letter-spacing: -2px; }
+
+    .feature-block { display: grid; grid-template-columns: 1fr 1.5fr; gap: 60px; margin-bottom: 120px; align-items: center; }
+    .feature-block:nth-child(even) { direction: rtl; }
+    .feature-block:nth-child(even) .text { direction: ltr; }
+
+    .img-placeholder { background: var(--off); height: 350px; border-radius: var(--rl); display: flex; align-items: center; justify-content: center; font-size: 50px; border: 1px dashed #ccc; }
+    .text h3 { font-family: 'Fraunces', serif; font-size: 32px; margin-bottom: 20px; }
+    .text p { font-size: 18px; color: var(--ink2); line-height: 1.7; }
+    .feature-list { margin-top: 20px; padding-left: 0; list-style: none; }
+    .feature-list li { margin-bottom: 10px; font-weight: 700; color: var(--accent); }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Powerful tools for<br><em>limitless</em> growth.</h1>
+
+  <div class="feature-block">
+    <div class="img-placeholder">🧠</div>
+    <div class="text">
+      <h3>The Matching Engine</h3>
+      <p>Our proprietary algorithm goes beyond keyword matching. It evaluates skill levels (Beginner, Intermediate, Expert) to ensure that a swap is balanced. You won't be matched with an expert if you are just starting out, unless both parties agree.</p>
+      <ul class="feature-list">
+        <li>✓ Level-based filtering</li>
+        <li>✓ Geographic proximity options</li>
+        <li>✓ Mutual-interest scoring</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="feature-block">
+    <div class="img-placeholder">🛡️</div>
+    <div class="text">
+      <h3>Reputation & Trust System</h3>
+      <p>In a community where knowledge is currency, trust is everything. Our review system is two-way. After every swap, you rate your partner's teaching quality and their punctuality. This ensures a high-quality ecosystem for everyone.</p>
+      <ul class="feature-list">
+        <li>✓ Verified User Badges</li>
+        <li>✓ Detailed Skill Endorsements</li>
+        <li>✓ Community Leaderboards</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</body>
+</html>

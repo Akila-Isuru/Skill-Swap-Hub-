@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillSwap Hub — Trade Skills, Grow Together</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,700;0,900;1,300;1,700&family=Cabinet+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --white:   #ffffff;
+            --off:     #f7f6f2;
+            --off2:    #eeecea;
+            --ink:     #0e0d0b;
+            --ink2:    #3d3b36;
+            --ink3:    #8a8780;
+            --accent:  #ff5c35;
+            --accent2: #ffb347;
+            --blue:    #3b6ef8;
+            --green:   #1cb87e;
+            --r: 16px; --rl: 28px;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Cabinet Grotesk', sans-serif;
+            background: var(--white);
+            color: var(--ink);
+            overflow-x: hidden;
+        }
+
+        /* ===================== NAV ===================== */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 20px 60px;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+            transition: padding .3s;
+        }
+        nav.scrolled { padding: 14px 60px; }
+        .nav-logo {
+            font-family: 'Fraunces', serif;
+            font-size: 22px; font-weight: 900;
+            color: var(--ink);
+            text-decoration: none;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .nav-logo .dot { width: 10px; height: 10px; background: var(--accent); border-radius: 50%; display: inline-block; }
+        .nav-links { display: flex; align-items: center; gap: 36px; }
+        .nav-links a { text-decoration: none; color: var(--ink2); font-size: 15px; font-weight: 500; transition: color .2s; }
+        .nav-links a:hover { color: var(--ink); }
+        .nav-cta {
+            background: var(--ink); color: white;
+            padding: 11px 26px; border-radius: 100px;
+            text-decoration: none; font-weight: 700; font-size: 14px;
+            transition: background .2s, transform .2s;
+        }
+        .nav-cta:hover { background: var(--accent); transform: translateY(-1px); }
+
+        /* ===================== HERO ===================== */
+        .hero {
+            min-height: 100vh;
+            display: flex; align-items: center;
+            padding: 120px 60px 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Animated mesh background */
+        .hero-bg {
+            position: absolute; inset: 0; z-index: 0;
+            background:
+                    radial-gradient(ellipse 80% 60% at 70% 40%, rgba(255,92,53,0.08) 0%, transparent 60%),
+                    radial-gradient(ellipse 60% 50% at 20% 70%, rgba(59,110,248,0.07) 0%, transparent 55%),
+                    radial-gradient(ellipse 50% 40% at 80% 80%, rgba(28,184,126,0.06) 0%, transparent 50%);
+            animation: meshShift 12s ease-in-out infinite alternate;
+        }
+        @keyframes meshShift {
+            0%   { background-position: 0% 0%, 100% 100%, 50% 50%; }
+            100% { background-position: 10% 10%, 90% 90%, 60% 40%; }
+        }
+
+        /* Floating orbs */
+        .orb {
+            position: absolute; border-radius: 50%;
+            filter: blur(60px); opacity: 0.5;
+            animation: orbFloat linear infinite;
+            pointer-events: none;
+        }
+        .orb1 { width: 320px; height: 320px; background: rgba(255,92,53,.18); top: 10%; right: 8%; animation-duration: 18s; }
+        .orb2 { width: 200px; height: 200px; background: rgba(59,110,248,.15); bottom: 20%; right: 25%; animation-duration: 24s; animation-delay: -6s; }
+        .orb3 { width: 160px; height: 160px; background: rgba(28,184,126,.18); top: 50%; left: 5%; animation-duration: 20s; animation-delay: -10s; }
+        @keyframes orbFloat {
+            0%,100% { transform: translateY(0) scale(1); }
+            33%      { transform: translateY(-30px) scale(1.05); }
+            66%      { transform: translateY(20px) scale(.96); }
+        }
+
+        .hero-content { position: relative; z-index: 1; max-width: 680px; }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--off); border: 1px solid var(--off2);
+            border-radius: 100px; padding: 8px 18px;
+            font-size: 13px; font-weight: 700; color: var(--ink2);
+            margin-bottom: 32px;
+            animation: fadeDown .8s ease both;
+        }
+        .hero-badge .pulse { width: 8px; height: 8px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(28,184,126,.5);} 50%{box-shadow:0 0 0 6px rgba(28,184,126,0);} }
+
+        .hero h1 {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(48px, 7vw, 88px);
+            font-weight: 900;
+            line-height: 1.0;
+            letter-spacing: -2px;
+            margin-bottom: 28px;
+            animation: fadeDown .8s .1s ease both;
+        }
+        .hero h1 em {
+            font-style: italic; font-weight: 300;
+            color: var(--accent);
+        }
+        .hero p {
+            font-size: 19px; color: var(--ink2); line-height: 1.7;
+            max-width: 500px; margin-bottom: 44px;
+            font-weight: 400;
+            animation: fadeDown .8s .2s ease both;
+        }
+        .hero-btns {
+            display: flex; gap: 14px; align-items: center;
+            animation: fadeDown .8s .3s ease both;
+        }
+        .btn-primary {
+            background: var(--ink); color: white;
+            padding: 16px 36px; border-radius: 100px;
+            text-decoration: none; font-weight: 800; font-size: 16px;
+            transition: all .25s;
+            box-shadow: 0 4px 24px rgba(14,13,11,.2);
+        }
+        .btn-primary:hover { background: var(--accent); transform: translateY(-3px); box-shadow: 0 12px 32px rgba(255,92,53,.35); }
+        .btn-secondary {
+            color: var(--ink2); text-decoration: none; font-weight: 600; font-size: 15px;
+            display: flex; align-items: center; gap: 8px; transition: color .2s;
+        }
+        .btn-secondary:hover { color: var(--ink); }
+        .btn-secondary .arrow { font-size: 20px; transition: transform .2s; }
+        .btn-secondary:hover .arrow { transform: translateX(4px); }
+
+        @keyframes fadeDown { from{opacity:0;transform:translateY(-20px);} to{opacity:1;transform:translateY(0);} }
+
+        /* ===================== 3D CARD SCENE ===================== */
+        .hero-visual {
+            position: absolute; right: 60px; top: 50%; transform: translateY(-50%);
+            width: 440px; height: 500px;
+            perspective: 1000px;
+            z-index: 1;
+            animation: fadeLeft .9s .4s ease both;
+        }
+        @keyframes fadeLeft { from{opacity:0;transform:translateY(-50%) translateX(40px);} to{opacity:1;transform:translateY(-50%) translateX(0);} }
+
+        .card-3d-wrap {
+            width: 100%; height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: float3d 8s ease-in-out infinite;
+        }
+        @keyframes float3d {
+            0%,100% { transform: rotateX(4deg) rotateY(-12deg) rotateZ(1deg); }
+            25%      { transform: rotateX(6deg) rotateY(-8deg) rotateZ(0deg); }
+            50%      { transform: rotateX(3deg) rotateY(-14deg) rotateZ(2deg); }
+            75%      { transform: rotateX(7deg) rotateY(-10deg) rotateZ(1deg); }
+        }
+
+        /* Main floating card */
+        .card-main {
+            position: absolute; top: 60px; left: 20px;
+            width: 300px;
+            background: white;
+            border-radius: 24px;
+            padding: 28px;
+            box-shadow: 0 30px 80px rgba(0,0,0,.14), 0 0 0 1px rgba(0,0,0,.04);
+            transform: translateZ(40px);
+        }
+        .card-main-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+        .card-avatar { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg,#ff5c35,#ffb347); display: flex; align-items: center; justify-content: center; font-weight: 800; color: white; font-size: 16px; }
+        .card-user h4 { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+        .card-user span { font-size: 12px; color: var(--ink3); }
+        .card-skills { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 18px; }
+        .skill-chip { padding: 5px 12px; border-radius: 100px; font-size: 12px; font-weight: 700; }
+        .chip-teach { background: #fff0ed; color: var(--accent); border: 1px solid #ffd5cb; }
+        .chip-learn { background: #eef2ff; color: var(--blue); border: 1px solid #c7d6fd; }
+        .card-action { background: var(--ink); color: white; border: none; width: 100%; padding: 12px; border-radius: 12px; font-weight: 700; font-size: 14px; cursor: pointer; font-family: 'Cabinet Grotesk', sans-serif; transition: background .2s; }
+        .card-action:hover { background: var(--accent); }
+
+        /* Secondary floating cards */
+        .card-sm {
+            position: absolute;
+            background: white;
+            border-radius: 18px;
+            padding: 16px 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,.1), 0 0 0 1px rgba(0,0,0,.04);
+        }
+        .card-match {
+            top: 20px; right: 0;
+            width: 190px;
+            transform: translateZ(70px);
+        }
+        .card-match .label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--ink3); margin-bottom: 10px; }
+        .match-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+        .match-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .match-dot.green { background: var(--green); }
+        .match-dot.blue  { background: var(--blue); }
+        .match-dot.orange{ background: var(--accent); }
+        .match-row span { font-size: 13px; font-weight: 600; }
+
+        .card-rating {
+            bottom: 90px; right: 20px;
+            width: 160px;
+            transform: translateZ(55px);
+            text-align: center;
+        }
+        .rating-stars { font-size: 20px; margin-bottom: 4px; }
+        .rating-val { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 900; line-height: 1; margin-bottom: 4px; }
+        .rating-lbl { font-size: 11px; color: var(--ink3); font-weight: 600; }
+
+        .card-notif {
+            bottom: 20px; left: 10px;
+            width: 240px;
+            transform: translateZ(60px);
+            display: flex; align-items: center; gap: 12px;
+        }
+        .notif-icon { width: 38px; height: 38px; border-radius: 50%; background: #e8f8f1; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+        .notif-text p { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+        .notif-text span { font-size: 11px; color: var(--ink3); }
+
+        /* ===================== STATS ===================== */
+        .stats {
+            background: var(--ink);
+            padding: 60px;
+            display: grid;
+            grid-template-columns: repeat(4,1fr);
+            gap: 40px;
+        }
+        .stat-item { text-align: center; }
+        .stat-num {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(36px,4vw,52px);
+            font-weight: 900;
+            color: white;
+            margin-bottom: 8px;
+        }
+        .stat-num span { color: var(--accent); }
+        .stat-label { font-size: 14px; color: rgba(255,255,255,.5); font-weight: 500; }
+
+        /* ===================== HOW IT WORKS ===================== */
+        .section { padding: 100px 60px; }
+        .section-tag { display: inline-block; background: var(--off); border: 1px solid var(--off2); border-radius: 100px; padding: 7px 18px; font-size: 13px; font-weight: 700; color: var(--ink2); margin-bottom: 20px; }
+        .section-title { font-family: 'Fraunces', serif; font-size: clamp(32px,4vw,52px); font-weight: 900; line-height: 1.1; letter-spacing: -1.5px; margin-bottom: 16px; }
+        .section-sub { font-size: 17px; color: var(--ink2); max-width: 480px; line-height: 1.7; margin-bottom: 60px; }
+
+        .steps { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
+        .step-card {
+            background: var(--off);
+            border-radius: var(--rl);
+            padding: 36px 32px;
+            border: 1px solid var(--off2);
+            position: relative;
+            overflow: hidden;
+            transition: transform .3s, box-shadow .3s;
+        }
+        .step-card:hover { transform: translateY(-6px); box-shadow: 0 24px 60px rgba(0,0,0,.1); }
+        .step-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+        .step-card:nth-child(1)::before { background: var(--accent); }
+        .step-card:nth-child(2)::before { background: var(--blue); }
+        .step-card:nth-child(3)::before { background: var(--green); }
+        .step-num { font-family: 'Fraunces', serif; font-size: 72px; font-weight: 900; line-height: 1; color: var(--off2); margin-bottom: 16px; }
+        .step-icon { font-size: 36px; margin-bottom: 16px; }
+        .step-card h3 { font-size: 20px; font-weight: 800; margin-bottom: 12px; }
+        .step-card p { font-size: 15px; color: var(--ink2); line-height: 1.7; }
+
+        /* ===================== FEATURES ===================== */
+        .features-section {
+            padding: 100px 60px;
+            background: var(--off);
+        }
+        .features-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 20px; }
+        .feature-card {
+            background: white;
+            border-radius: var(--rl);
+            padding: 36px;
+            border: 1px solid var(--off2);
+            transition: transform .3s, box-shadow .3s;
+        }
+        .feature-card:hover { transform: translateY(-4px); box-shadow: 0 20px 50px rgba(0,0,0,.08); }
+        .feature-card.wide { grid-column: span 2; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+        .feat-icon { font-size: 32px; margin-bottom: 18px; width: 64px; height: 64px; border-radius: 16px; display: flex; align-items: center; justify-content: center; }
+        .feat-icon.orange { background: #fff0ed; }
+        .feat-icon.blue   { background: #eef2ff; }
+        .feat-icon.green  { background: #e8f8f1; }
+        .feat-icon.yellow { background: #fffbeb; }
+        .feature-card h3 { font-size: 20px; font-weight: 800; margin-bottom: 10px; }
+        .feature-card p { font-size: 15px; color: var(--ink2); line-height: 1.7; }
+
+        /* Mini card mockup inside feature card */
+        .feat-mockup { background: var(--off); border-radius: 16px; padding: 20px; }
+        .feat-mockup-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: white; border-radius: 10px; margin-bottom: 8px; border: 1px solid var(--off2); }
+        .feat-mockup-row:last-child { margin-bottom: 0; }
+        .fm-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; color: white; flex-shrink: 0; }
+        .fm-text { flex: 1; }
+        .fm-text p { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+        .fm-text span { font-size: 11px; color: var(--ink3); }
+        .fm-badge { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 100px; white-space: nowrap; }
+        .fm-badge.green { background: #e8f8f1; color: var(--green); }
+        .fm-badge.orange { background: #fff0ed; color: var(--accent); }
+
+        /* ===================== TESTIMONIALS ===================== */
+        .testimonials-section { padding: 100px 60px; }
+        .testi-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+        .testi-card { background: var(--off); border: 1px solid var(--off2); border-radius: var(--rl); padding: 32px; transition: transform .3s; }
+        .testi-card:hover { transform: translateY(-4px); }
+        .testi-stars { color: var(--accent2); font-size: 16px; margin-bottom: 16px; letter-spacing: 2px; }
+        .testi-card blockquote { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 300; font-style: italic; line-height: 1.6; color: var(--ink); margin-bottom: 20px; }
+        .testi-user { display: flex; align-items: center; gap: 12px; }
+        .testi-avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; color: white; }
+        .testi-meta p { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+        .testi-meta span { font-size: 12px; color: var(--ink3); }
+
+        /* ===================== CTA ===================== */
+        .cta-section {
+            margin: 0 60px 80px;
+            background: var(--ink);
+            border-radius: 32px;
+            padding: 90px 80px;
+            display: flex; align-items: center; justify-content: space-between; gap: 40px;
+            position: relative; overflow: hidden;
+        }
+        .cta-section::before {
+            content: '';
+            position: absolute; top: -100px; right: -100px;
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(255,92,53,.25), transparent 70%);
+        }
+        .cta-section::after {
+            content: '';
+            position: absolute; bottom: -80px; left: 40%;
+            width: 300px; height: 300px;
+            background: radial-gradient(circle, rgba(59,110,248,.2), transparent 70%);
+        }
+        .cta-text { position: relative; z-index: 1; }
+        .cta-text h2 { font-family: 'Fraunces', serif; font-size: clamp(28px,3.5vw,44px); font-weight: 900; color: white; line-height: 1.15; margin-bottom: 14px; }
+        .cta-text h2 em { color: var(--accent); font-style: italic; font-weight: 300; }
+        .cta-text p { color: rgba(255,255,255,.6); font-size: 16px; line-height: 1.6; }
+        .cta-btns { display: flex; flex-direction: column; gap: 12px; flex-shrink: 0; position: relative; z-index: 1; }
+        .btn-cta-primary { background: var(--accent); color: white; padding: 16px 36px; border-radius: 100px; text-decoration: none; font-weight: 800; font-size: 16px; text-align: center; transition: all .25s; white-space: nowrap; }
+        .btn-cta-primary:hover { background: #ff7055; transform: translateY(-2px); box-shadow: 0 8px 28px rgba(255,92,53,.4); }
+        .btn-cta-secondary { color: rgba(255,255,255,.6); text-decoration: none; font-size: 14px; font-weight: 600; text-align: center; transition: color .2s; }
+        .btn-cta-secondary:hover { color: white; }
+
+        /* ===================== FOOTER ===================== */
+        footer {
+            padding: 40px 60px;
+            display: flex; align-items: center; justify-content: space-between;
+            border-top: 1px solid var(--off2);
+        }
+        .footer-logo { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 900; color: var(--ink); display: flex; align-items: center; gap: 7px; }
+        footer p { font-size: 13px; color: var(--ink3); }
+        .footer-links { display: flex; gap: 24px; }
+        .footer-links a { font-size: 13px; color: var(--ink3); text-decoration: none; transition: color .2s; }
+        .footer-links a:hover { color: var(--ink); }
+
+        /* ===================== SCROLL REVEAL ===================== */
+        .reveal { opacity: 0; transform: translateY(30px); transition: opacity .7s ease, transform .7s ease; }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+        .reveal-delay-1 { transition-delay: .1s; }
+        .reveal-delay-2 { transition-delay: .2s; }
+        .reveal-delay-3 { transition-delay: .3s; }
+
+        /* ===================== RESPONSIVE ===================== */
+        @media (max-width: 1024px) {
+            .hero-visual { display: none; }
+            nav { padding: 18px 30px; }
+            .section, .features-section, .testimonials-section { padding: 70px 30px; }
+            .stats { padding: 50px 30px; grid-template-columns: repeat(2,1fr); }
+            .steps { grid-template-columns: 1fr; }
+            .features-grid { grid-template-columns: 1fr; }
+            .feature-card.wide { grid-column: span 1; grid-template-columns: 1fr; }
+            .testi-grid { grid-template-columns: 1fr; }
+            .cta-section { margin: 0 30px 60px; padding: 60px 40px; flex-direction: column; }
+            footer { flex-direction: column; gap: 20px; text-align: center; padding: 30px; }
+            .hero { padding: 120px 30px 80px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="navbar">
+    <a href="#" class="nav-logo"><span class="dot"></span> SkillSwap</a>
+    <div class="nav-links">
+        <a href="how-it-works.html">How it works</a>
+        <a href="features.html">Features</a>
+        <a href="reviews-nav.html">Reviews</a>
+    </div>
+    <a href="login.html" class="nav-cta">Sign In →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-bg"></div>
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="orb orb3"></div>
+
+    <div class="hero-content">
+        <div class="hero-badge">
+            <span class="pulse"></span>
+            Live community · 500+ skill swappers
+        </div>
+        <h1>
+            Trade skills.<br>
+            <em>Grow</em> together.
+        </h1>
+        <p>
+            SkillSwap Hub connects people who want to teach what they know
+            and learn what they don't — no money, just mutual growth.
+        </p>
+        <div class="hero-btns">
+            <a href="pages/register.html" class="btn-primary">Start Swapping Free</a>
+            <a href="#how" class="btn-secondary">See how it works <span class="arrow">→</span></a>
+        </div>
+    </div>
+
+    <!-- 3D floating card scene -->
+    <div class="hero-visual">
+        <div class="card-3d-wrap">
+
+            <!-- Main profile card -->
+            <div class="card-main">
+                <div class="card-main-header">
+                    <div class="card-avatar">DK</div>
+                    <div class="card-user">
+                        <h4>Dilini Kumari</h4>
+                        <span>⭐ 4.9 · 12 swaps</span>
+                    </div>
+                </div>
+                <div class="card-skills">
+                    <span class="skill-chip chip-teach">Teaches Photography</span>
+                    <span class="skill-chip chip-teach">Teaches Lightroom</span>
+                    <span class="skill-chip chip-learn">Learns Python</span>
+                    <span class="skill-chip chip-learn">Learns UI Design</span>
+                </div>
+                <button class="card-action">Send Swap Request</button>
+            </div>
+
+            <!-- Match count card -->
+            <div class="card-sm card-match">
+                <div class="label">Your matches</div>
+                <div class="match-row"><span class="match-dot green"></span><span>Photography · 3 matches</span></div>
+                <div class="match-row"><span class="match-dot blue"></span><span>Python · 7 matches</span></div>
+                <div class="match-row"><span class="match-dot orange"></span><span>UI Design · 5 matches</span></div>
+            </div>
+
+            <!-- Rating card -->
+            <div class="card-sm card-rating">
+                <div class="rating-stars">⭐⭐⭐⭐⭐</div>
+                <div class="rating-val">4.9</div>
+                <div class="rating-lbl">avg community rating</div>
+            </div>
+
+            <!-- Notification card -->
+            <div class="card-sm card-notif">
+                <div class="notif-icon">🎉</div>
+                <div class="notif-text">
+                    <p>Saman accepted!</p>
+                    <span>Your swap request was accepted</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- STATS -->
+<div class="stats">
+    <div class="stat-item reveal">
+        <div class="stat-num">500<span>+</span></div>
+        <div class="stat-label">Active Members</div>
+    </div>
+    <div class="stat-item reveal reveal-delay-1">
+        <div class="stat-num">1.2<span>K</span></div>
+        <div class="stat-label">Skills Listed</div>
+    </div>
+    <div class="stat-item reveal reveal-delay-2">
+        <div class="stat-num">340<span>+</span></div>
+        <div class="stat-label">Successful Swaps</div>
+    </div>
+    <div class="stat-item reveal reveal-delay-3">
+        <div class="stat-num">4.8<span>★</span></div>
+        <div class="stat-label">Average Rating</div>
+    </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section class="section" id="how">
+    <div class="section-tag">How it works</div>
+    <h2 class="section-title">Three steps to your<br>first skill swap</h2>
+    <p class="section-sub">No money changes hands. Just two people helping each other grow.</p>
+
+    <div class="steps">
+        <div class="step-card reveal">
+            <div class="step-num">01</div>
+            <div class="step-icon">📚</div>
+            <h3>List your skills</h3>
+            <p>Add what you can teach and what you want to learn. Set your expertise level so the right people find you.</p>
+        </div>
+        <div class="step-card reveal reveal-delay-1">
+            <div class="step-num">02</div>
+            <div class="step-icon">🔍</div>
+            <h3>Get smart matches</h3>
+            <p>Our matching engine finds people whose teaching skills align with your learning goals — and vice versa.</p>
+        </div>
+        <div class="step-card reveal reveal-delay-2">
+            <div class="step-num">03</div>
+            <div class="step-icon">🔄</div>
+            <h3>Swap & grow</h3>
+            <p>Send a swap request, connect, and start learning together. Rate your experience to build community trust.</p>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features-section" id="features">
+    <div class="section-tag">Features</div>
+    <h2 class="section-title">Everything you need<br>to swap smarter</h2>
+    <p class="section-sub">Built for real people who want to genuinely connect and grow.</p>
+
+    <div class="features-grid">
+        <div class="feature-card wide reveal">
+            <div>
+                <div class="feat-icon orange">🎯</div>
+                <h3>Smart Matching Engine</h3>
+                <p>Our algorithm cross-references your "want to learn" list against the community's "can teach" skills and surfaces the best mutual matches — not just one-way fits.</p>
+            </div>
+            <div class="feat-mockup">
+                <div class="feat-mockup-row">
+                    <div class="fm-avatar" style="background:linear-gradient(135deg,#ff5c35,#ffb347)">SK</div>
+                    <div class="fm-text"><p>Saman Kumara</p><span>Can teach: Robotics Engineering</span></div>
+                    <span class="fm-badge orange">Match</span>
+                </div>
+                <div class="feat-mockup-row">
+                    <div class="fm-avatar" style="background:linear-gradient(135deg,#3b6ef8,#6c63ff)">KP</div>
+                    <div class="fm-text"><p>Kasun Perera</p><span>Can teach: Java Programming</span></div>
+                    <span class="fm-badge green">Match</span>
+                </div>
+                <div class="feat-mockup-row">
+                    <div class="fm-avatar" style="background:linear-gradient(135deg,#1cb87e,#3b6ef8)">DP</div>
+                    <div class="fm-text"><p>Dilini Perera</p><span>Can teach: Photography</span></div>
+                    <span class="fm-badge orange">Match</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="feature-card reveal">
+            <div class="feat-icon blue">⭐</div>
+            <h3>Reviews & Ratings</h3>
+            <p>After every swap, both parties can leave honest ratings. Build a reputation that makes you a sought-after swap partner in the community.</p>
+        </div>
+
+        <div class="feature-card reveal reveal-delay-1">
+            <div class="feat-icon green">🏆</div>
+            <h3>Community Leaderboard</h3>
+            <p>The top-rated skill swappers rise to the top. Gamified reputation building keeps everyone motivated to deliver real value.</p>
+        </div>
+
+        <div class="feature-card reveal reveal-delay-2">
+            <div class="feat-icon yellow">🔔</div>
+            <h3>Real-time Notifications</h3>
+            <p>Get instant alerts when someone sends you a swap request, accepts yours, or leaves you a review. Never miss a connection.</p>
+        </div>
+
+        <div class="feature-card reveal reveal-delay-3">
+            <div class="feat-icon orange">🌍</div>
+            <h3>Explore Feed</h3>
+            <p>Browse all skills in the community, discover new people, and find swap partners even outside your current learning list.</p>
+        </div>
+    </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials-section" id="reviews">
+    <div class="section-tag">Community voices</div>
+    <h2 class="section-title">Real swaps,<br>real growth</h2>
+
+    <div class="testi-grid" style="margin-top:48px;">
+        <div class="testi-card reveal">
+            <div class="testi-stars">★★★★★</div>
+            <blockquote>"I taught Dilini photography for a month while she taught me Python. Best learning experience I've ever had — more focused than any YouTube tutorial."</blockquote>
+            <div class="testi-user">
+                <div class="testi-avatar" style="background:linear-gradient(135deg,#3b6ef8,#6c63ff)">KP</div>
+                <div class="testi-meta"><p>Kasun Perera</p><span>Python · Photography swap</span></div>
+            </div>
+        </div>
+        <div class="testi-card reveal reveal-delay-1">
+            <div class="testi-stars">★★★★★</div>
+            <blockquote>"The smart matching blew me away. I listed 'want to learn UI Design' and within a day had three matches from designers who wanted to learn marketing."</blockquote>
+            <div class="testi-user">
+                <div class="testi-avatar" style="background:linear-gradient(135deg,#ff5c35,#ffb347)">NS</div>
+                <div class="testi-meta"><p>Nimesha Silva</p><span>UI Design · Marketing swap</span></div>
+            </div>
+        </div>
+        <div class="testi-card reveal reveal-delay-2">
+            <div class="testi-stars">★★★★★</div>
+            <blockquote>"Finally a platform where knowledge is the currency. I've done four swaps and learned more in two months than I did in a year of solo studying."</blockquote>
+            <div class="testi-user">
+                <div class="testi-avatar" style="background:linear-gradient(135deg,#1cb87e,#3b6ef8)">RJ</div>
+                <div class="testi-meta"><p>Ravindu Jayasinghe</p><span>Robotics · Java swap</span></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-section reveal">
+    <div class="cta-text">
+        <h2>Ready to make your<br>first <em>swap</em>?</h2>
+        <p>Join hundreds of people already trading skills<br>and growing together — completely free.</p>
+    </div>
+    <div class="cta-btns">
+        <a href="register.html" class="btn-cta-primary">Create Free Account</a>
+        <a href="login.html" class="btn-cta-secondary">Already have an account? Sign in</a>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+    <div class="footer-logo"><span style="color:var(--accent)">●</span> SkillSwap Hub</div>
+    <p>© 2026 SkillSwap Hub. Built with ❤️ for learners.</p>
+    <div class="footer-links">
+        <a href="login.html">Sign In</a>
+        <a href="register.html">Register</a>
+        <a href="#how">How it works</a>
+    </div>
+</footer>
+
+<script>
+    // Nav scroll effect
+    window.addEventListener('scroll', () => {
+        document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 40);
+    });
+
+    // Scroll reveal
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // Smooth 3D card tilt on mouse move (desktop)
+    const wrap = document.querySelector('.card-3d-wrap');
+    if (wrap) {
+        document.addEventListener('mousemove', e => {
+            const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+            const dx = (e.clientX - cx) / cx * 6;
+            const dy = (e.clientY - cy) / cy * 4;
+            wrap.style.transform = `rotateX(${4 - dy}deg) rotateY(${-12 + dx}deg) rotateZ(1deg)`;
+        });
+    }
+</script>
+</body>
+</html>

@@ -6,7 +6,6 @@
     <title>SkillSwap Hub | Dashboard</title>
 
     <script>
-
         (function() {
             const token = localStorage.getItem('token');
             const userId = localStorage.getItem('userId');
@@ -17,131 +16,669 @@
     </script>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,700;0,900;1,300;1,700&family=Cabinet+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
+
     <style>
         :root {
-            --sidebar-bg: #1e293b;
-            --main-bg: #f8fafc;
-            --accent: #3b82f6;
-            --card-bg: #ffffff;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --border-color: #e2e8f0;
-            --danger: #ef4444;
-        }
-        * { box-sizing: border-box; }
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--main-bg);
-            margin: 0;
-            display: flex;
-            color: var(--text-main);
+            --white:   #ffffff;
+            --off:     #f7f6f2;
+            --off2:    #eeecea;
+            --off3:    #e5e3de;
+            --ink:     #0e0d0b;
+            --ink2:    #3d3b36;
+            --ink3:    #8a8780;
+            --ink4:    #bbb9b4;
+            --accent:  #ff5c35;
+            --accent2: #ffb347;
+            --blue:    #3b6ef8;
+            --green:   #1cb87e;
+            --sidebar-w: 272px;
         }
 
-        /* Sidebar Styling */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Cabinet Grotesk', sans-serif;
+            background: var(--off);
+            color: var(--ink);
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ===================== SIDEBAR ===================== */
         .sidebar {
-            width: 280px;
-            background: var(--sidebar-bg);
+            width: var(--sidebar-w);
+            background: var(--ink);
             height: 100vh;
             position: fixed;
-            padding: 30px 20px;
+            top: 0; left: 0;
+            padding: 32px 20px;
             display: flex;
             flex-direction: column;
             overflow-y: auto;
+            z-index: 50;
         }
-        .sidebar h2 { color: white; margin-bottom: 30px; display: flex; align-items: center; gap: 10px; font-size: 22px; }
 
-        .nav-menu { flex: 1; }
-        .nav-label { color: #475569; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin: 20px 0 10px 10px; }
+        /* Subtle dot pattern on sidebar */
+        .sidebar::before {
+            content: '';
+            position: absolute; inset: 0;
+            background-image: radial-gradient(rgba(255,255,255,.04) 1px, transparent 1px);
+            background-size: 20px 20px;
+            pointer-events: none;
+        }
 
-        .nav-link { display: flex; align-items: center; color: #94a3b8; padding: 12px 15px; text-decoration: none; border-radius: 10px; transition: 0.2s; cursor: pointer; margin-bottom: 5px; font-size: 15px; }
-        .nav-link span { margin-right: 12px; font-size: 18px; }
-        .nav-link:hover, .nav-link.active { background: rgba(59, 130, 246, 0.1); color: var(--accent); }
-        .nav-link.active { background: var(--accent); color: white; }
+        .sidebar-logo {
+            display: flex; align-items: center; gap: 10px;
+            text-decoration: none; margin-bottom: 36px;
+            position: relative; z-index: 1;
+        }
+        .logo-dot {
+            width: 32px; height: 32px;
+            background: var(--accent);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+        .logo-text {
+            font-family: 'Fraunces', serif;
+            font-size: 20px; font-weight: 900;
+            color: white; line-height: 1;
+        }
+        .logo-text span { display: block; font-size: 10px; font-weight: 400; color: rgba(255,255,255,.4); font-family: 'Cabinet Grotesk', sans-serif; letter-spacing: .5px; margin-top: 2px; }
 
-        .notif-badge { background: var(--danger); color: white; font-size: 10px; padding: 2px 6px; border-radius: 50%; margin-left: auto; }
+        .nav-section { margin-bottom: 6px; position: relative; z-index: 1; }
+        .nav-label {
+            font-size: 10px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1.2px;
+            color: rgba(255,255,255,.25);
+            padding: 16px 12px 8px;
+        }
 
-        .logout-btn { color: #f87171 !important; border: 1px solid rgba(248, 113, 113, 0.2); margin-top: 20px; }
-        .logout-btn:hover { background: rgba(248, 113, 113, 0.1) !important; }
+        .nav-link {
+            display: flex; align-items: center; gap: 10px;
+            color: rgba(255,255,255,.5);
+            padding: 10px 12px;
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all .2s;
+            cursor: pointer;
+            margin-bottom: 2px;
+            font-size: 14px; font-weight: 500;
+            position: relative;
+        }
+        .nav-link .nav-icon {
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 15px;
+            background: rgba(255,255,255,.06);
+            flex-shrink: 0;
+            transition: all .2s;
+        }
+        .nav-link:hover {
+            color: rgba(255,255,255,.85);
+            background: rgba(255,255,255,.07);
+        }
+        .nav-link:hover .nav-icon { background: rgba(255,255,255,.12); }
+        .nav-link.active {
+            color: white;
+            background: rgba(255,92,53,.15);
+            border: 1px solid rgba(255,92,53,.2);
+        }
+        .nav-link.active .nav-icon { background: var(--accent); }
 
-        /* Main Content Styling */
-        .main-content { flex: 1; margin-left: 280px; padding: 50px 60px; max-width: 1400px; }
-        .header-section { margin-bottom: 40px; }
-        .header-section h1 { font-size: 32px; margin: 0; }
-        .header-section p { color: var(--text-muted); margin-top: 8px; }
+        .notif-badge {
+            background: var(--accent);
+            color: white;
+            font-size: 10px; font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 100px;
+            margin-left: auto;
+            display: none;
+        }
 
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 25px; }
-        .stat-card { background: var(--card-bg); padding: 25px; border-radius: 20px; border: 1px solid var(--border-color); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); transition: 0.3s; }
-        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
-        .stat-card h3 { margin: 0; color: var(--text-muted); font-size: 14px; font-weight: 600; text-transform: uppercase; }
-        .stat-card .value { font-size: 36px; font-weight: 800; margin-top: 15px; display: block; color: var(--text-main); }
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,.07);
+            position: relative; z-index: 1;
+        }
+        .user-pill {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            background: rgba(255,255,255,.05);
+            margin-bottom: 8px;
+        }
+        .user-pill-avatar {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 12px; color: white;
+            flex-shrink: 0;
+        }
+        .user-pill-name { font-size: 13px; font-weight: 700; color: rgba(255,255,255,.8); }
+        .user-pill-role { font-size: 11px; color: rgba(255,255,255,.35); }
+
+        .logout-btn {
+            display: flex; align-items: center; gap: 10px;
+            color: rgba(255,100,80,.7) !important;
+            padding: 10px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px; font-weight: 500;
+            transition: all .2s;
+            border: none; background: none;
+            width: 100%;
+            font-family: 'Cabinet Grotesk', sans-serif;
+        }
+        .logout-btn:hover { background: rgba(255,92,53,.1); color: var(--accent) !important; }
+        .logout-btn .nav-icon { width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 13px; background: rgba(255,92,53,.1); }
+
+        /* ===================== MAIN CONTENT ===================== */
+        .main {
+            margin-left: var(--sidebar-w);
+            flex: 1;
+            padding: 48px 56px;
+            max-width: calc(1400px + var(--sidebar-w));
+        }
+
+        /* Header */
+        .top-bar {
+            display: flex; align-items: flex-start; justify-content: space-between;
+            margin-bottom: 48px;
+            animation: fadeDown .6s ease both;
+        }
+        @keyframes fadeDown { from{opacity:0;transform:translateY(-16px);}to{opacity:1;transform:translateY(0);} }
+
+        .welcome-block {}
+        .welcome-tag {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: white; border: 1px solid var(--off2);
+            border-radius: 100px; padding: 5px 14px;
+            font-size: 12px; font-weight: 700; color: var(--ink3);
+            margin-bottom: 12px;
+        }
+        .welcome-tag .pulse { width: 7px; height: 7px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(28,184,126,.5);}50%{box-shadow:0 0 0 5px rgba(28,184,126,0);} }
+
+        .welcome-block h1 {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(26px, 3vw, 38px);
+            font-weight: 900;
+            line-height: 1.1;
+            letter-spacing: -1px;
+            margin-bottom: 6px;
+        }
+        .welcome-block h1 em { font-style: italic; font-weight: 300; color: var(--accent); }
+        .welcome-block p { color: var(--ink3); font-size: 15px; }
+
+        .top-actions { display: flex; gap: 10px; align-items: center; margin-top: 8px; }
+        .btn-quick {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 10px 18px; border-radius: 100px;
+            font-size: 13px; font-weight: 700;
+            text-decoration: none; transition: all .2s;
+            border: none; cursor: pointer;
+            font-family: 'Cabinet Grotesk', sans-serif;
+        }
+        .btn-quick.primary { background: var(--ink); color: white; }
+        .btn-quick.primary:hover { background: var(--accent); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255,92,53,.3); }
+        .btn-quick.secondary { background: white; color: var(--ink2); border: 1px solid var(--off2); }
+        .btn-quick.secondary:hover { border-color: var(--off3); transform: translateY(-1px); }
+
+        /* ===================== STATS GRID ===================== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+            margin-bottom: 36px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 20px;
+            padding: 24px 22px;
+            border: 1px solid var(--off2);
+            position: relative;
+            overflow: hidden;
+            transition: transform .3s, box-shadow .3s;
+            animation: fadeUp .5s ease both;
+        }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);} }
+        .stat-card:nth-child(1){animation-delay:.05s}
+        .stat-card:nth-child(2){animation-delay:.10s}
+        .stat-card:nth-child(3){animation-delay:.15s}
+        .stat-card:nth-child(4){animation-delay:.20s}
+
+        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,.08); }
+
+        /* Colored top border per card */
+        .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; border-radius: 20px 20px 0 0; }
+        .stat-card.c-orange::before { background: var(--accent); }
+        .stat-card.c-blue::before   { background: var(--blue); }
+        .stat-card.c-green::before  { background: var(--green); }
+        .stat-card.c-gold::before   { background: var(--accent2); }
+
+        .stat-icon {
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+            margin-bottom: 16px;
+        }
+        .stat-card.c-orange .stat-icon { background: #fff0ed; }
+        .stat-card.c-blue   .stat-icon { background: #eef2ff; }
+        .stat-card.c-green  .stat-icon { background: #e8f8f1; }
+        .stat-card.c-gold   .stat-icon { background: #fffbeb; }
+
+        .stat-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--ink3); margin-bottom: 8px; }
+        .stat-value {
+            font-family: 'Fraunces', serif;
+            font-size: 40px; font-weight: 900;
+            line-height: 1; color: var(--ink);
+        }
+        .stat-sub { font-size: 12px; color: var(--ink4); margin-top: 6px; }
+
+        /* ===================== CONTENT ROW ===================== */
+        .content-row {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        /* Quick actions panel */
+        .panel {
+            background: white;
+            border-radius: 20px;
+            border: 1px solid var(--off2);
+            padding: 28px;
+            animation: fadeUp .5s .25s ease both;
+        }
+        .panel-title {
+            font-family: 'Fraunces', serif;
+            font-size: 18px; font-weight: 700;
+            margin-bottom: 20px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--off2);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .panel-title a { font-family: 'Cabinet Grotesk', sans-serif; font-size: 13px; font-weight: 600; color: var(--blue); text-decoration: none; }
+        .panel-title a:hover { text-decoration: underline; }
+
+        /* Action grid */
+        .actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .action-tile {
+            display: flex; flex-direction: column; align-items: flex-start;
+            padding: 18px; border-radius: 14px;
+            text-decoration: none;
+            border: 1px solid var(--off2);
+            background: var(--off);
+            transition: all .25s;
+            cursor: pointer;
+        }
+        .action-tile:hover { background: white; border-color: var(--off3); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.07); }
+        .action-tile .tile-icon { font-size: 24px; margin-bottom: 10px; }
+        .action-tile .tile-label { font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 3px; }
+        .action-tile .tile-sub { font-size: 11px; color: var(--ink3); }
+
+        /* 3D floating card - right panel */
+        .card-panel {
+            background: white;
+            border-radius: 20px;
+            border: 1px solid var(--off2);
+            padding: 28px;
+            animation: fadeUp .5s .3s ease both;
+            position: relative;
+            overflow: hidden;
+        }
+        .card-panel::before {
+            content: '';
+            position: absolute;
+            top: -60px; right: -60px;
+            width: 200px; height: 200px;
+            background: radial-gradient(circle, rgba(255,92,53,.08), transparent 70%);
+            pointer-events: none;
+        }
+
+        /* Mini 3D scene */
+        .mini-3d-wrap {
+            perspective: 600px;
+            margin: 16px 0;
+        }
+        .mini-3d-inner {
+            transform-style: preserve-3d;
+            animation: miniFloat 7s ease-in-out infinite;
+        }
+        @keyframes miniFloat {
+            0%,100% { transform: rotateX(3deg) rotateY(-8deg); }
+            50%      { transform: rotateX(5deg) rotateY(-4deg); }
+        }
+        .mini-card {
+            background: var(--off);
+            border: 1px solid var(--off2);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 10px;
+            transition: transform .2s;
+            transform: translateZ(10px);
+        }
+        .mini-card:hover { transform: translateZ(20px) scale(1.02); }
+        .mini-card:last-child { margin-bottom: 0; }
+        .mini-card-row { display: flex; align-items: center; gap: 10px; }
+        .mini-avatar { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; color: white; flex-shrink: 0; }
+        .mini-info p { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+        .mini-info span { font-size: 11px; color: var(--ink3); }
+        .mini-chip { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 100px; margin-left: auto; white-space: nowrap; }
+        .chip-teach { background: #fff0ed; color: var(--accent); }
+        .chip-learn { background: #eef2ff; color: var(--blue); }
+
+        /* Trending skills section */
+        .trending-panel {
+            background: var(--ink);
+            border-radius: 20px;
+            padding: 28px;
+            animation: fadeUp .5s .35s ease both;
+            position: relative; overflow: hidden;
+        }
+        .trending-panel::before {
+            content: '';
+            position: absolute;
+            top: -80px; right: -80px;
+            width: 250px; height: 250px;
+            background: radial-gradient(circle, rgba(255,92,53,.2), transparent 65%);
+            pointer-events: none;
+        }
+        .trending-panel::after {
+            content: '';
+            position: absolute;
+            bottom: -60px; left: 20%;
+            width: 180px; height: 180px;
+            background: radial-gradient(circle, rgba(59,110,248,.15), transparent 65%);
+            pointer-events: none;
+        }
+        .trending-panel .panel-title { color: white; border-bottom-color: rgba(255,255,255,.1); }
+        .trending-panel .panel-title a { color: rgba(255,255,255,.5); }
+        .trending-panel .panel-title a:hover { color: white; }
+
+        .trending-list { position: relative; z-index: 1; }
+        .trending-row {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,.06);
+        }
+        .trending-row:last-child { border-bottom: none; }
+        .trend-rank {
+            font-family: 'Fraunces', serif;
+            font-size: 18px; font-weight: 900;
+            color: rgba(255,255,255,.15);
+            width: 28px; flex-shrink: 0; text-align: center;
+        }
+        .trend-bar-wrap { flex: 1; }
+        .trend-name { font-size: 13px; font-weight: 700; color: rgba(255,255,255,.8); margin-bottom: 5px; }
+        .trend-bar { height: 4px; background: rgba(255,255,255,.08); border-radius: 100px; overflow: hidden; }
+        .trend-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 1s ease; }
+        .trend-count { font-size: 12px; color: rgba(255,255,255,.4); white-space: nowrap; }
+
+        /* ===================== SCROLL REVEAL ===================== */
+        .reveal { opacity: 0; transform: translateY(24px); transition: opacity .6s ease, transform .6s ease; }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
     </style>
 </head>
 <body>
 
+<!-- ===================== SIDEBAR ===================== -->
 <div class="sidebar">
-    <h2><span>🚀</span> SkillSwap</h2>
+    <a href="index.html" class="sidebar-logo">
+        <div class="logo-dot">🚀</div>
+        <div class="logo-text">SkillSwap<span>Hub</span></div>
+    </a>
 
-    <div class="nav-menu">
+    <div class="nav-section">
         <div class="nav-label">Main Menu</div>
-        <a href="index.html" class="nav-link active"><span>🏠</span> Dashboard</a>
-        <a href="pages/explore.html" class="nav-link"><span>🌍</span> Explore Feed</a>
-        <a href="pages/find-matches.html" class="nav-link"><span>🔍</span> Smart Matches</a>
+        <a href="index.html" class="nav-link active">
+            <div class="nav-icon">🏠</div> Dashboard
+        </a>
+        <a href="pages/explore.html" class="nav-link">
+            <div class="nav-icon">🌍</div> Explore Feed
+        </a>
+        <a href="pages/find-matches.html" class="nav-link">
+            <div class="nav-icon">🔍</div> Smart Matches
+        </a>
+    </div>
 
+    <div class="nav-section">
         <div class="nav-label">My Activity</div>
-        <a href="pages/my-skills.html" class="nav-link"><span>📚</span> My Skills</a>
-        <a href="pages/requests.html" class="nav-link"><span>📩</span> Swap Requests</a>
-        <a href="pages/notifications.html" class="nav-link"><span>🔔</span> Notifications <div class="notif-badge" id="notif-count">0</div></a>
+        <a href="pages/my-skills.html" class="nav-link">
+            <div class="nav-icon">📚</div> My Skills
+        </a>
+        <a href="pages/requests.html" class="nav-link">
+            <div class="nav-icon">📩</div> Swap Requests
+        </a>
+        <a href="pages/notifications.html" class="nav-link">
+            <div class="nav-icon">🔔</div> Notifications
+            <span class="notif-badge" id="notif-count">0</span>
+        </a>
+    </div>
 
+    <div class="nav-section">
         <div class="nav-label">Community</div>
-        <a href="pages/leaderboard.html" class="nav-link"><span>🏆</span> Leaderboard</a>
-        <a href="pages/reviews.html" class="nav-link"><span>⭐</span> Reviews & Ratings</a>
+        <a href="pages/leaderboard.html" class="nav-link">
+            <div class="nav-icon">🏆</div> Leaderboard
+        </a>
+        <a href="pages/reviews.html" class="nav-link">
+            <div class="nav-icon">⭐</div> Reviews & Ratings
+        </a>
+    </div>
 
-        <div class="nav-label">Settings</div>
-        <a href="pages/profile.html" class="nav-link"><span>👤</span> My Profile</a>
-        <a onclick="logout()" class="nav-link logout-btn"><span>🚪</span> Logout</a>
+    <div class="nav-section">
+        <div class="nav-label">Account</div>
+        <a href="pages/profile.html" class="nav-link">
+            <div class="nav-icon">👤</div> My Profile
+        </a>
+    </div>
+
+    <div class="sidebar-footer">
+        <div class="user-pill">
+            <div class="user-pill-avatar" id="sidebar-avatar">?</div>
+            <div>
+                <div class="user-pill-name" id="sidebar-name">Loading…</div>
+                <div class="user-pill-role">Skill Swapper</div>
+            </div>
+        </div>
+        <button class="logout-btn" onclick="logout()">
+            <div class="nav-icon">🚪</div> Sign Out
+        </button>
     </div>
 </div>
 
-<div class="main-content">
-    <div class="header-section">
-        <h1 id="welcome-msg">Welcome...</h1>
-        <p id="user-bio">Your daily skill-swapping activity at a glance.</p>
+<!-- ===================== MAIN ===================== -->
+<div class="main">
+
+    <!-- Top bar -->
+    <div class="top-bar">
+        <div class="welcome-block">
+            <div class="welcome-tag"><span class="pulse"></span> Active now</div>
+            <h1 id="welcome-msg">Welcome back, <em>friend!</em></h1>
+            <p id="user-bio">Your daily skill-swapping activity at a glance.</p>
+        </div>
+        <div class="top-actions">
+            <a href="pages/find-matches.html" class="btn-quick primary">🔍 Find Matches</a>
+            <a href="pages/my-skills.html" class="btn-quick secondary">+ Add Skill</a>
+        </div>
     </div>
 
+    <!-- Stats -->
     <div class="stats-grid">
-        <div class="stat-card"><h3>Avg. Rating</h3><span class="value" id="stat-rating">0.0</span></div>
-        <div class="stat-card"><h3>Active Skills</h3><span class="value" id="stat-skills">0</span></div>
-        <div class="stat-card"><h3>Incoming Swaps</h3><span class="value" id="stat-incoming">0</span></div>
-        <div class="stat-card"><h3>Sent Requests</h3><span class="value" id="stat-outgoing">0</span></div>
+        <div class="stat-card c-orange">
+            <div class="stat-icon">⭐</div>
+            <div class="stat-label">Avg Rating</div>
+            <div class="stat-value" id="stat-rating">0.0</div>
+            <div class="stat-sub">Community trust score</div>
+        </div>
+        <div class="stat-card c-blue">
+            <div class="stat-icon">📚</div>
+            <div class="stat-label">Active Skills</div>
+            <div class="stat-value" id="stat-skills">0</div>
+            <div class="stat-sub">Teaching + learning</div>
+        </div>
+        <div class="stat-card c-green">
+            <div class="stat-icon">📩</div>
+            <div class="stat-label">Incoming Swaps</div>
+            <div class="stat-value" id="stat-incoming">0</div>
+            <div class="stat-sub">Pending requests</div>
+        </div>
+        <div class="stat-card c-gold">
+            <div class="stat-icon">📤</div>
+            <div class="stat-label">Sent Requests</div>
+            <div class="stat-value" id="stat-outgoing">0</div>
+            <div class="stat-sub">Your outgoing swaps</div>
+        </div>
     </div>
-</div>
+
+    <!-- Content row -->
+    <div class="content-row">
+
+        <!-- Quick actions -->
+        <div class="panel">
+            <div class="panel-title">
+                Quick Actions
+                <a href="pages/explore.html">View all →</a>
+            </div>
+            <div class="actions-grid">
+                <a href="pages/find-matches.html" class="action-tile">
+                    <div class="tile-icon">🔍</div>
+                    <div class="tile-label">Smart Matches</div>
+                    <div class="tile-sub">Find your ideal swap partner</div>
+                </a>
+                <a href="pages/requests.html" class="action-tile">
+                    <div class="tile-icon">📩</div>
+                    <div class="tile-label">Swap Requests</div>
+                    <div class="tile-sub">Manage incoming & outgoing</div>
+                </a>
+                <a href="pages/my-skills.html" class="action-tile">
+                    <div class="tile-icon">📚</div>
+                    <div class="tile-label">My Skills</div>
+                    <div class="tile-sub">Add or update your skills</div>
+                </a>
+                <a href="pages/explore.html" class="action-tile">
+                    <div class="tile-icon">🌍</div>
+                    <div class="tile-label">Explore</div>
+                    <div class="tile-sub">Browse skills & people</div>
+                </a>
+                <a href="pages/reviews.html" class="action-tile">
+                    <div class="tile-icon">⭐</div>
+                    <div class="tile-label">Reviews</div>
+                    <div class="tile-sub">Rate your swap partners</div>
+                </a>
+                <a href="pages/leaderboard.html" class="action-tile">
+                    <div class="tile-icon">🏆</div>
+                    <div class="tile-label">Leaderboard</div>
+                    <div class="tile-sub">Top rated swappers</div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Community mini cards (3D animated) -->
+        <div class="card-panel">
+            <div class="panel-title" style="font-size:16px;">
+                Recent Activity
+            </div>
+            <div class="mini-3d-wrap">
+                <div class="mini-3d-inner" id="activity-cards">
+                    <!-- Populated by JS / static fallback -->
+                    <div class="mini-card">
+                        <div class="mini-card-row">
+                            <div class="mini-avatar" style="background:linear-gradient(135deg,#ff5c35,#ffb347)">DK</div>
+                            <div class="mini-info">
+                                <p>Dilini Kumari</p>
+                                <span>Photography · Beginner</span>
+                            </div>
+                            <span class="mini-chip chip-teach">Teaches</span>
+                        </div>
+                    </div>
+                    <div class="mini-card">
+                        <div class="mini-card-row">
+                            <div class="mini-avatar" style="background:linear-gradient(135deg,#3b6ef8,#6c63ff)">SK</div>
+                            <div class="mini-info">
+                                <p>Saman Kumara</p>
+                                <span>Robotics · Expert</span>
+                            </div>
+                            <span class="mini-chip chip-teach">Teaches</span>
+                        </div>
+                    </div>
+                    <div class="mini-card">
+                        <div class="mini-card-row">
+                            <div class="mini-avatar" style="background:linear-gradient(135deg,#1cb87e,#3b6ef8)">KP</div>
+                            <div class="mini-info">
+                                <p>Kasun Perera</p>
+                                <span>Java · Intermediate</span>
+                            </div>
+                            <span class="mini-chip chip-teach">Teaches</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <a href="pages/explore.html" class="btn-quick secondary" style="width:100%;justify-content:center;margin-top:8px;font-size:13px;">Explore People →</a>
+        </div>
+
+    </div>
+
+    <!-- Trending skills (full width dark panel) -->
+    <div class="trending-panel reveal">
+        <div class="panel-title">
+            🔥 Trending Skills
+            <a href="pages/explore.html" style="color:rgba(255,255,255,.4);">Explore all →</a>
+        </div>
+        <div class="trending-list" id="trending-list">
+            <!-- Populated by API -->
+            <div style="color:rgba(255,255,255,.3);font-size:14px;text-align:center;padding:20px;">Loading trending skills…</div>
+        </div>
+    </div>
+
+</div><!-- /main -->
 
 <script>
     const token = localStorage.getItem('token');
     const loggedInUserId = localStorage.getItem('userId');
 
+    // ---- Load user summary ----
     function loadUserSummary() {
         if (!token || !loggedInUserId) return;
-
-
         $.ajax({
             url: "http://localhost:8080/api/v1/user/summary/" + loggedInUserId,
             method: "GET",
             headers: { "Authorization": "Bearer " + token },
-            success: function (res) {
-                if (res.code === 200) {
-                    const data = res.data;
-                    $("#welcome-msg").text("Welcome back, " + data.userName + "!");
-                    $("#user-bio").text(data.bio || "Share a skill, learn a skill today.");
-                    $("#stat-rating").text(data.averageRating ? data.averageRating.toFixed(1) : "0.0");
-                    $("#stat-skills").text(data.totalSkills || 0);
-                    $("#stat-incoming").text(data.pendingIncomingRequests || 0);
-                    $("#stat-outgoing").text(data.totalOutgoingRequests || 0);
+            success: function(res) {
+                if (res.code === 200 && res.data) {
+                    const d = res.data;
 
+                    // Welcome message
+                    const firstName = d.userName ? d.userName.split(' ')[0] : 'friend';
+                    $("#welcome-msg").html("Welcome back, <em>" + firstName + "!</em>");
+                    $("#user-bio").text(d.bio || "Share a skill, learn a skill today.");
 
-                    if(data.unreadNotifications > 0) {
-                        $("#notif-count").text(data.unreadNotifications).show();
+                    // Stats
+                    $("#stat-rating").text(d.averageRating ? d.averageRating.toFixed(1) : "0.0");
+                    $("#stat-skills").text(d.totalSkills || 0);
+                    $("#stat-incoming").text(d.pendingIncomingRequests || 0);
+                    $("#stat-outgoing").text(d.totalOutgoingRequests || 0);
+
+                    // Sidebar user pill
+                    const initials = d.userName
+                        ? d.userName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2)
+                        : '?';
+                    $("#sidebar-avatar").text(initials);
+                    $("#sidebar-name").text(d.userName || "User");
+
+                    // Notification badge
+                    if (d.unreadNotifications > 0) {
+                        $("#notif-count").text(d.unreadNotifications).css('display','inline-block');
                     } else {
                         $("#notif-count").hide();
                     }
@@ -153,13 +690,122 @@
         });
     }
 
+    // ---- Load trending skills ----
+    function loadTrending() {
+        $.ajax({
+            url: "http://localhost:8080/api/v1/skill/trending",
+            method: "GET",
+            headers: { "Authorization": "Bearer " + token },
+            success: function(res) {
+                const list = $("#trending-list").empty();
+                const data = res.data || [];
+
+                if (!data.length) {
+                    list.html('<div style="color:rgba(255,255,255,.3);font-size:14px;text-align:center;padding:20px;">No trending data yet.</div>');
+                    return;
+                }
+
+                const maxCount = data[0].count || 1;
+
+                data.slice(0, 6).forEach((item, i) => {
+                    const pct = Math.round((item.count / maxCount) * 100);
+                    const colors = ['var(--accent)', 'var(--blue)', 'var(--green)', 'var(--accent2)', '#a78bfa', '#34d399'];
+                    list.append(`
+                        <div class="trending-row">
+                            <div class="trend-rank">${i + 1}</div>
+                            <div class="trend-bar-wrap">
+                                <div class="trend-name">${item.skillName}</div>
+                                <div class="trend-bar">
+                                    <div class="trend-fill" style="width:0%;background:${colors[i]}" data-width="${pct}%"></div>
+                                </div>
+                            </div>
+                            <div class="trend-count">${item.count} learners</div>
+                        </div>
+                    `);
+                });
+
+                // Animate bars after render
+                setTimeout(() => {
+                    $(".trend-fill").each(function() {
+                        $(this).css('width', $(this).data('width'));
+                    });
+                }, 200);
+            },
+            error: function() {
+                // Silently fail — trending is a bonus feature
+            }
+        });
+    }
+
+    // ---- Load recent community members for activity panel ----
+    function loadRecentUsers() {
+        $.ajax({
+            url: "http://localhost:8080/api/v1/user/all",
+            method: "GET",
+            headers: { "Authorization": "Bearer " + token },
+            success: function(res) {
+                const users = (res.data || []).filter(u => String(u.id) !== String(loggedInUserId)).slice(0, 3);
+                if (!users.length) return;
+
+                const colors = [
+                    'linear-gradient(135deg,#ff5c35,#ffb347)',
+                    'linear-gradient(135deg,#3b6ef8,#6c63ff)',
+                    'linear-gradient(135deg,#1cb87e,#3b6ef8)'
+                ];
+
+                const wrap = $("#activity-cards").empty();
+                users.forEach((u, i) => {
+                    const initials = u.name ? u.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2) : '?';
+                    wrap.append(`
+                        <div class="mini-card" style="cursor:pointer;" onclick="window.location.href='pages/user-profile.html?userId=${u.id}'">
+                            <div class="mini-card-row">
+                                <div class="mini-avatar" style="background:${colors[i]}">${initials}</div>
+                                <div class="mini-info">
+                                    <p>${u.name}</p>
+                                    <span>Member</span>
+                                </div>
+                                <span class="mini-chip chip-learn">View →</span>
+                            </div>
+                        </div>
+                    `);
+                });
+            },
+            error: function() { /* keep static fallback */ }
+        });
+    }
+
+    // ---- Logout ----
     function logout() {
         localStorage.clear();
         window.location.replace("pages/login.html");
     }
 
-    $(document).ready(loadUserSummary);
-</script>
+    // ---- Scroll reveal ----
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
+    // ---- Mouse tilt on mini 3D ----
+    const miniWrap = document.querySelector('.mini-3d-inner');
+    if (miniWrap) {
+        document.querySelector('.card-panel').addEventListener('mousemove', e => {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / rect.width - .5;
+            const y = (e.clientY - rect.top)  / rect.height - .5;
+            miniWrap.style.transform = `rotateX(${-y * 10}deg) rotateY(${x * 12}deg)`;
+        });
+        document.querySelector('.card-panel').addEventListener('mouseleave', () => {
+            miniWrap.style.transform = '';
+        });
+    }
+
+    // ---- Init ----
+    $(document).ready(function() {
+        loadUserSummary();
+        loadTrending();
+        loadRecentUsers();
+    });
+</script>
 </body>
 </html>

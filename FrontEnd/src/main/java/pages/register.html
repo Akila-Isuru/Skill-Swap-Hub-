@@ -1,18 +1,275 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Register - Skill Swap Hub</title>
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Join Us — SkillSwap Hub</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,700;0,900;1,300;1,700&family=Cabinet+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --white: #ffffff;
+      --off: #f7f6f2;
+      --off2: #eeecea;
+      --ink: #0e0d0b;
+      --ink2: #3d3b36;
+      --accent: #ff5c35;
+      --rl: 28px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Cabinet Grotesk', sans-serif;
+      background: var(--off);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 30% 60%, rgba(255,92,53,0.09) 0%, transparent 60%),
+      radial-gradient(ellipse 70% 55% at 80% 30%, rgba(28,184,126,0.07) 0%, transparent 55%);
+      animation: meshShift 16s ease-in-out infinite alternate;
+      z-index: 0;
+    }
+
+    @keyframes meshShift {
+      0% { background-position: 0% 0%, 100% 100%; }
+      100% { background-position: 15% 15%, 85% 85%; }
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(65px);
+      opacity: 0.32;
+      z-index: 0;
+    }
+    .orb1 { width: 420px; height: 420px; background: rgba(255,92,53,.17); top: -120px; right: -80px; animation: orbFloat 28s ease-in-out infinite; }
+    .orb2 { width: 280px; height: 280px; background: rgba(28,184,126,.16); bottom: -90px; left: -60px; animation: orbFloat 34s ease-in-out infinite 4s; }
+
+    @keyframes orbFloat {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(30px, -50px) scale(1.05); }
+    }
+
+    .auth-card-wrap {
+      position: relative;
+      z-index: 2;
+      width: 440px;
+      animation: fadeUp 1s ease both;
+    }
+
+    .auth-card {
+      background: rgba(255, 255, 255, 0.93);
+      backdrop-filter: blur(22px);
+      padding: 48px 46px;
+      border-radius: var(--rl);
+      border: 1px solid rgba(0,0,0,0.05);
+      box-shadow: 0 35px 90px rgba(0,0,0,0.13),
+      0 0 0 1px rgba(255,255,255,0.7) inset;
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .auth-card:hover {
+      transform: translateY(-10px);
+    }
+
+    .auth-card h2 {
+      font-family: 'Fraunces', serif;
+      font-size: 40px;
+      font-weight: 900;
+      text-align: center;
+      margin-bottom: 10px;
+      letter-spacing: -1.2px;
+    }
+
+    .auth-card p {
+      text-align: center;
+      color: var(--ink2);
+      font-size: 15.5px;
+      margin-bottom: 38px;
+      line-height: 1.5;
+    }
+
+    .input-group {
+      margin-bottom: 18px;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 15px 20px;
+      border-radius: 16px;
+      border: 1px solid rgba(0,0,0,0.09);
+      background: white;
+      font-size: 15px;
+      transition: all 0.3s ease;
+      font-family: inherit;
+    }
+
+    textarea {
+      height: 92px;
+      resize: vertical;
+      min-height: 92px;
+    }
+
+    input:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(255,92,53,0.12);
+      transform: translateY(-1px);
+    }
+
+    button {
+      width: 100%;
+      padding: 17px;
+      border-radius: 100px;
+      background: var(--ink);
+      color: white;
+      border: none;
+      font-weight: 800;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 12px;
+      box-shadow: 0 6px 20px rgba(14,13,11,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      position: relative;
+    }
+
+    button:hover:not(:disabled) {
+      background: var(--accent);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(255,92,53,0.35);
+    }
+
+    button:disabled {
+      background: #666;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Loading Spinner */
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .footer-link {
+      text-align: center;
+      margin-top: 30px;
+      font-size: 14.5px;
+      color: var(--ink2);
+    }
+
+    .footer-link a {
+      color: var(--accent);
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(50px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
 <body>
-<h2>Create Account</h2>
-<input type="text" id="name" placeholder="Full Name"><br>
-<input type="email" id="email" placeholder="Email"><br>
-<input type="password" id="password" placeholder="Password"><br>
-<textarea id="bio" placeholder="Short Bio"></textarea><br>
-<button onclick="registerUser()">Register</button>
-<p>Already have an account? <a href="login.html">Login here</a></p>
 
-<script src="../js/user.js"></script>
+<div class="hero-bg"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<div class="auth-card-wrap">
+  <div class="auth-card">
+    <h2>Join the community</h2>
+    <p>Trade skills. Grow together. Start free today.</p>
+
+    <div class="input-group">
+      <input type="text" id="name" placeholder="Full Name" required>
+    </div>
+    <div class="input-group">
+      <input type="email" id="email" placeholder="Email Address" required>
+    </div>
+    <div class="input-group">
+      <input type="password" id="password" placeholder="Create Password" required>
+    </div>
+    <div class="input-group">
+      <textarea id="bio" placeholder="Tell us what you can teach or want to learn... (optional)"></textarea>
+    </div>
+
+    <button id="registerBtn" onclick="registerUser()">
+      <span id="regBtnText">Create Account →</span>
+    </button>
+
+    <div class="footer-link">
+      Already swapping? <a href="login.html">Sign in here</a>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  const registerBtn = document.getElementById('registerBtn');
+  const regBtnText = document.getElementById('regBtnText');
+
+  function registerUser() {
+    const name = $('#name').val().trim();
+    const email = $('#email').val().trim();
+    const password = $('#password').val().trim();
+    const bio = $('#bio').val().trim();
+
+    if (!name || !email || !password) {
+      alert("Please fill in all required fields");
+      return;
+    }
+
+    // Show loading state
+    registerBtn.disabled = true;
+    regBtnText.innerHTML = `<span class="spinner"></span> Creating account...`;
+
+    const userData = { name, email, password, bio };
+
+    $.ajax({
+      url: "http://localhost:8080/api/v1/auth/register",
+      method: "POST",
+      contentType: "application/json",
+      data: JSON.stringify(userData),
+      success: function (res) {
+        alert("Account created successfully! Redirecting to sign in...");
+        window.location.href = "login.html";
+      },
+      error: function() {
+        alert("Registration failed. Please try again.");
+        resetRegisterButton();
+      },
+      complete: function() {
+        resetRegisterButton();
+      }
+    });
+  }
+
+  function resetRegisterButton() {
+    registerBtn.disabled = false;
+    regBtnText.textContent = "Create Account →";
+  }
+</script>
 </body>
 </html>
