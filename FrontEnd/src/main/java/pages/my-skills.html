@@ -2,195 +2,318 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Manage My Skills - SkillSwap Hub</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Skills — SkillSwap Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,700;0,900;1,300&family=Cabinet+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script>
-
         const token = localStorage.getItem('token');
         const loggedInUserId = localStorage.getItem('userId');
-
-        if (!token || !loggedInUserId || loggedInUserId === "undefined") {
-            window.location.replace("login.html");
-        }
+        if (!token || !loggedInUserId || loggedInUserId === "undefined") window.location.replace("login.html");
     </script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 30px; background: #f4f7f6; color: #2c3e50; }
-        .form-container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 30px; }
-        h2 { margin-top: 0; color: #34495e; font-weight: 600; }
-        .input-row { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end; }
-        .input-group { display: flex; flex-direction: column; flex: 1; min-width: 200px; position: relative; }
-        label { font-weight: 600; margin-bottom: 8px; font-size: 14px; }
-        input, select { padding: 12px; border: 1px solid #dcdde1; border-radius: 8px; font-size: 15px; outline: none; transition: 0.3s; }
-        input:focus, select:focus { border-color: #3498db; box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2); }
-
-        #skill-suggestions {
-            position: absolute; top: 100%; left: 0; right: 0; background: white;
-            border: 1px solid #ddd; border-radius: 0 0 8px 8px; z-index: 1000;
-            display: none; max-height: 250px; overflow-y: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        :root {
+            --bg: #f7f6f2;
+            --white: #ffffff;
+            --off2: #eeecea;
+            --ink: #0e0d0b;
+            --ink2: #3d3b36;
+            --ink3: #8a8780;
+            --accent: #ff5c35;
+            --accent2: #ffb347;
+            --blue: #3b6ef8;
+            --green: #1cb87e;
+            --border: rgba(0,0,0,0.06);
+            --r: 18px;
+            --rl: 24px;
         }
-        .suggestion-item { padding: 12px; cursor: pointer; border-bottom: 1px solid #f1f1f1; font-size: 14px; }
-        .suggestion-item:hover { background: #f8f9fa; color: #3498db; }
-        .new-skill-btn { background: #f0f7ff; color: #007bff; font-weight: bold; border-top: 2px solid #eef2f7; }
 
-        .btn-save { background: #27ae60; color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; height: 46px; }
-        table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; }
-        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
-        th { background: #34495e; color: white; }
-        .badge { padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
-        .badge-teach { background: #eafaf1; color: #27ae60; }
-        .badge-learn { background: #ebf5fb; color: #3498db; }
-        .back-link { margin-bottom: 20px; display: inline-block; text-decoration: none; color: #3498db; font-weight: 500; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Cabinet Grotesk', sans-serif;
+            background: var(--bg);
+            color: var(--ink);
+            min-height: 100vh;
+            padding: 60px 24px;
+            perspective: 1200px;
+        }
+
+        body::before {
+            content: ''; position: fixed; inset: 0;
+            background-image: radial-gradient(rgba(0,0,0,0.03) 1px, transparent 1px);
+            background-size: 32px 32px; z-index: 0;
+        }
+
+        .wrap { max-width: 860px; margin: 0 auto; position: relative; z-index: 1; }
+
+        .back-link {
+            display: inline-flex; align-items: center; gap: 8px;
+            color: var(--ink3); text-decoration: none;
+            font-size: 14px; font-weight: 700; margin-bottom: 40px;
+            transition: color .2s;
+        }
+        .back-link:hover { color: var(--accent); }
+
+        h1 {
+            font-family: 'Fraunces', serif;
+            font-size: 36px; font-weight: 900; letter-spacing: -1px;
+            margin-bottom: 36px;
+        }
+
+        /* 3D Form Card */
+        .add-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--rl);
+            padding: 32px;
+            margin-bottom: 32px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.03);
+            animation: cardIn .6s cubic-bezier(0.16, 1, 0.3, 1);
+            transform-style: preserve-3d;
+        }
+
+        @keyframes cardIn {
+            from { opacity: 0; transform: translateY(30px) rotateX(-5deg); }
+            to { opacity: 1; transform: translateY(0) rotateX(0); }
+        }
+
+        .card-title {
+            font-family: 'Fraunces', serif;
+            font-size: 19px; font-weight: 800;
+            margin-bottom: 24px; color: var(--ink);
+        }
+
+        .input-row { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; }
+
+        .input-group { display: flex; flex-direction: column; flex: 1; min-width: 200px; position: relative; }
+
+        label {
+            font-size: 11px; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 0.8px; color: var(--ink3); margin-bottom: 10px;
+        }
+
+        input, select {
+            padding: 12px 16px; background: var(--bg);
+            border: 1px solid var(--border); border-radius: var(--r);
+            color: var(--ink); font-size: 14px; font-weight: 600;
+            font-family: inherit; outline: none; transition: all 0.2s ease;
+        }
+
+        input:focus, select:focus {
+            background: var(--white); border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(255, 92, 53, 0.08);
+        }
+
+        /* Suggestion Box */
+        #skill-suggestions {
+            position: absolute; top: calc(100% + 8px); left: 0; right: 0;
+            background: var(--white); border: 1px solid var(--border);
+            border-radius: var(--r); z-index: 100; display: none;
+            max-height: 240px; overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .suggestion-item {
+            padding: 12px 18px; cursor: pointer; font-size: 14px; font-weight: 600;
+            border-bottom: 1px solid var(--off2); transition: .2s;
+        }
+        .suggestion-item:hover { background: var(--bg); color: var(--accent); }
+        .new-skill-btn { background: #fffaf9; color: var(--accent); border-top: 1px solid rgba(255,92,53,0.1) !important; }
+
+        .btn-add {
+            background: var(--ink); color: var(--white);
+            border: none; padding: 0 28px; border-radius: var(--r);
+            cursor: pointer; font-family: inherit; font-size: 14px;
+            font-weight: 800; height: 46px; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .btn-add:hover { background: var(--accent); transform: translateY(-3px) scale(1.02); box-shadow: 0 10px 20px rgba(255,92,53,0.2); }
+
+        /* Modern Table Design */
+        .table-card {
+            background: var(--white); border: 1px solid var(--border);
+            border-radius: var(--rl); overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+            animation: cardIn .6s .1s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        .table-header {
+            display: grid; grid-template-columns: 1fr 140px 140px 100px;
+            padding: 16px 28px; background: #faf9f7;
+            border-bottom: 1px solid var(--border);
+        }
+        .table-header span { font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--ink3); letter-spacing: 0.5px; }
+
+        .table-row {
+            display: grid; grid-template-columns: 1fr 140px 140px 100px;
+            padding: 18px 28px; border-bottom: 1px solid var(--border);
+            align-items: center; transition: all 0.3s ease;
+            transform-origin: center left;
+        }
+        .table-row:last-child { border-bottom: none; }
+        .table-row:hover { background: #fffcfb; transform: translateX(8px); }
+
+        .skill-name-cell { font-size: 15px; font-weight: 800; color: var(--ink); }
+
+        .badge {
+            padding: 5px 12px; border-radius: 100px; font-size: 10px;
+            font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;
+            display: inline-flex; align-items: center;
+        }
+        .badge-teach { background: #ecfdf5; color: var(--green); border: 1px solid rgba(28,184,126,0.15); }
+        .badge-learn { background: #eef2ff; color: var(--blue); border: 1px solid rgba(59,110,248,0.15); }
+
+        .level-text { font-size: 13px; font-weight: 600; color: var(--ink2); }
+
+        .btn-delete {
+            background: transparent; border: 1px solid var(--border);
+            color: var(--ink3); cursor: pointer; font-size: 12px;
+            font-weight: 700; padding: 6px 12px; border-radius: 10px;
+            transition: all 0.2s;
+        }
+        .btn-delete:hover { background: #fff1f2; color: #e11d48; border-color: #fecaca; }
+
+        /* Loading/Empty */
+        .empty-table { text-align: center; padding: 60px 24px; color: var(--ink3); font-weight: 500; }
+        .spinner {
+            width: 32px; height: 32px; border: 3px solid var(--off2);
+            border-top-color: var(--accent); border-radius: 50%;
+            animation: spin .8s linear infinite; margin: 0 auto 16px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-<a href="../index.html" class="back-link">← Back to Dashboard</a>
+<div class="wrap">
+    <a href="../index.html" class="back-link">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+        Dashboard
+    </a>
 
-<div class="form-container">
-    <h2>Manage My Skills</h2>
-    <div class="input-row">
-        <div class="input-group">
-            <label>Skill Name</label>
-            <input type="text" id="skill-search" placeholder="Type a skill..." autocomplete="off">
-            <input type="hidden" id="selected-skill-id">
-            <div id="skill-suggestions"></div>
+    <h1>My Skills</h1>
+
+    <div class="add-card">
+        <div class="card-title">Add New Expertise</div>
+        <div class="input-row">
+            <div class="input-group">
+                <label>Skill Name</label>
+                <input type="text" id="skill-search" placeholder="e.g. Java, Photography..." autocomplete="off">
+                <input type="hidden" id="selected-skill-id">
+                <div id="skill-suggestions"></div>
+            </div>
+            <div class="input-group" style="max-width:180px;">
+                <label>Intent</label>
+                <select id="skill-type">
+                    <option value="TEACH">I can Teach</option>
+                    <option value="LEARN">I want to Learn</option>
+                </select>
+            </div>
+            <div class="input-group" style="max-width:180px;">
+                <label>Expertise</label>
+                <select id="expertise-level">
+                    <option value="Beginner">Beginner</option>
+                    <option value="Intermediate">Intermediate</option>
+                    <option value="Expert">Expert</option>
+                </select>
+            </div>
+            <button class="btn-add" onclick="assignSkill()">Add to Profile</button>
         </div>
+    </div>
 
-        <div class="input-group">
-            <label>Type</label>
-            <select id="skill-type">
-                <option value="TEACH">I can Teach</option>
-                <option value="LEARN">I want to Learn</option>
-            </select>
+    <div class="table-card">
+        <div class="table-header">
+            <span>Skill</span><span>Type</span><span>Level</span><span>Action</span>
         </div>
-
-        <div class="input-group">
-            <label>Expertise Level</label>
-            <select id="expertise-level">
-                <option value="Beginner">Beginner</option>
-                <option value="Intermediate">Intermediate</option>
-                <option value="Expert">Expert</option>
-            </select>
+        <div id="skill-table-body">
+            <div class="empty-table"><div class="spinner"></div><p>Gathering your skills...</p></div>
         </div>
-
-        <button class="btn-save" onclick="assignSkill()">Add to My Profile</button>
     </div>
 </div>
 
-<table>
-    <thead>
-    <tr><th>Skill Name</th><th>Purpose</th><th>Proficiency</th><th>Action</th></tr>
-    </thead>
-    <tbody id="skill-table-body"></tbody>
-</table>
-
 <script>
-
+    // Autocomplete logic
     $("#skill-search").on("input", function() {
-        let keyword = $(this).val();
-        let div = $("#skill-suggestions");
-
+        const keyword = $(this).val();
+        const div = $("#skill-suggestions");
         if (keyword.length >= 2) {
             $.ajax({
                 url: "http://localhost:8080/api/v1/skill/search?keyword=" + keyword,
-                method: "GET",
-                headers: { "Authorization": "Bearer " + token },
+                method: "GET", headers: { "Authorization": "Bearer " + token },
                 success: function(res) {
                     div.empty().show();
-                    if (res.data && res.data.length > 0) {
-                        res.data.forEach(s => {
-                            div.append(`<div class="suggestion-item" onclick="selectSkill(${s.id}, '${s.skillName}')">${s.skillName}</div>`);
-                        });
-                    }
-                    div.append(`<div class="suggestion-item new-skill-btn" onclick="addNewSkillOption('${keyword}')">Add "${keyword}" as a new skill</div>`);
+                    (res.data || []).forEach(s => {
+                        div.append(`<div class="suggestion-item" onclick="selectSkill(${s.id},'${s.skillName}')">${s.skillName}</div>`);
+                    });
+                    div.append(`<div class="suggestion-item new-skill-btn" onclick="addNewSkillOption('${keyword}')">+ Add "${keyword}" as new skill</div>`);
                 }
             });
-        } else {
-            div.hide();
-        }
+        } else { div.hide(); }
     });
 
-    function selectSkill(id, name) {
-        $("#skill-search").val(name);
-        $("#selected-skill-id").val(id);
-        $("#skill-suggestions").hide();
-    }
+    $(document).on("click", function(e) {
+        if (!$(e.target).closest(".input-group").length) $("#skill-suggestions").hide();
+    });
 
-    function addNewSkillOption(name) {
-        $("#skill-search").val(name);
-        $("#selected-skill-id").val(0);
-        $("#skill-suggestions").hide();
-    }
-
+    function selectSkill(id, name) { $("#skill-search").val(name); $("#selected-skill-id").val(id); $("#skill-suggestions").hide(); }
+    function addNewSkillOption(name) { $("#skill-search").val(name); $("#selected-skill-id").val(0); $("#skill-suggestions").hide(); }
 
     function assignSkill() {
-        const skillName = $("#skill-search").val();
-        const skillId = $("#selected-skill-id").val();
-
-        if(!skillName) {
-            alert("Please type or select a skill!");
-            return;
-        }
-
-        const data = {
-            userId: parseInt(loggedInUserId),
-            skillId: skillId ? parseInt(skillId) : null,
-            skillName: skillName,
-            type: $("#skill-type").val(),
-            expertiseLevel: $("#expertise-level").val()
-        };
+        const skillName = $("#skill-search").val().trim();
+        const skillId   = $("#selected-skill-id").val();
+        if (!skillName) return;
 
         $.ajax({
             url: "http://localhost:8080/api/v1/user-skill/assign",
-            method: "POST",
-            headers: { "Authorization": "Bearer " + token },
+            method: "POST", headers: { "Authorization": "Bearer " + token },
             contentType: "application/json",
-            data: JSON.stringify(data),
+            data: JSON.stringify({
+                userId: parseInt(loggedInUserId),
+                skillId: skillId ? parseInt(skillId) : null,
+                skillName,
+                type: $("#skill-type").val(),
+                expertiseLevel: $("#expertise-level").val()
+            }),
             success: function() {
-                alert("Skill added successfully!");
                 $("#skill-search").val("");
                 $("#selected-skill-id").val("");
                 loadMySkills();
-            },
-            error: function(err) {
-                alert("Error: " + (err.responseJSON ? err.responseJSON.message : "Failed"));
             }
         });
     }
-
 
     function loadMySkills() {
         $.ajax({
             url: "http://localhost:8080/api/v1/user-skill/user/" + loggedInUserId,
-            method: "GET",
-            headers: { "Authorization": "Bearer " + token },
+            method: "GET", headers: { "Authorization": "Bearer " + token },
             success: function(res) {
-                const tbody = $("#skill-table-body").empty();
-                if(res.data) {
-                    res.data.forEach(s => {
-                        let badge = s.type === 'TEACH' ? 'badge-teach' : 'badge-learn';
-                        tbody.append(`<tr>
-                            <td><strong>${s.skillName}</strong></td>
-                            <td><span class="badge ${badge}">${s.type}</span></td>
-                            <td>${s.expertiseLevel}</td>
-                            <td><button style="color:red; cursor:pointer; border:none; background:none;" onclick="deleteSkill(${s.id})">Delete</button></td>
-                        </tr>`);
-                    });
+                const body = $("#skill-table-body").empty();
+                if (!res.data || !res.data.length) {
+                    body.html('<div class="empty-table">No skills listed yet. Start by adding one above!</div>');
+                    return;
                 }
+                res.data.forEach((s, i) => {
+                    const badgeClass = s.type === 'TEACH' ? 'badge-teach' : 'badge-learn';
+                    body.append(`
+            <div class="table-row" style="animation: cardIn .5s ${i*0.05}s ease both">
+              <div class="skill-name-cell">${s.skillName}</div>
+              <div><span class="badge ${badgeClass}">${s.type}</span></div>
+              <div class="level-text">${s.expertiseLevel}</div>
+              <div><button class="btn-delete" onclick="deleteSkill(${s.id})">Remove</button></div>
+            </div>`);
+                });
             }
         });
     }
 
-
     function deleteSkill(id) {
-        if(confirm("Remove this skill?")) {
-            $.ajax({
-                url: "http://localhost:8080/api/v1/user-skill/" + id,
-                method: "DELETE",
-                headers: { "Authorization": "Bearer " + token },
-                success: loadMySkills
-            });
-        }
+        if (!confirm("Are you sure you want to remove this skill?")) return;
+        $.ajax({
+            url: "http://localhost:8080/api/v1/user-skill/" + id,
+            method: "DELETE", headers: { "Authorization": "Bearer " + token },
+            success: loadMySkills
+        });
     }
 
     $(document).ready(loadMySkills);

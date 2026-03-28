@@ -3,433 +3,269 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Explore - SkillSwap Hub</title>
+  <title>Explore | SkillSwap Hub</title>
   <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,700;0,900;1,300&family=Cabinet+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
+
   <script>
     const token = localStorage.getItem('token');
     const loggedInUserId = localStorage.getItem('userId');
     if (!token) window.location.replace("login.html");
   </script>
+
   <style>
-    * { box-sizing: border-box; }
-    body { font-family: 'Inter', 'Segoe UI', sans-serif; background: #f4f7f6; padding: 20px; color: #1e293b; margin: 0; }
+    :root {
+      --bg: #f7f6f2;
+      --white: #ffffff;
+      --off2: #eeecea;
+      --ink: #0e0d0b;
+      --ink2: #3d3b36;
+      --ink3: #8a8780;
+      --accent: #ff5c35;
+      --accent-soft: rgba(255, 92, 53, 0.08);
+      --border: rgba(0,0,0,0.06);
+      --r: 18px;
+    }
 
-    .back-link { text-decoration: none; color: #3b82f6; font-weight: 500; display: inline-block; margin-bottom: 20px; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    .page-header { text-align: center; margin-bottom: 28px; }
-    .page-header h2 { font-size: 28px; margin: 0 0 6px 0; }
-    .page-header p  { color: #64748b; margin: 0; font-size: 15px; }
+    body {
+      font-family: 'Cabinet Grotesk', sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      padding: 60px 24px;
+      perspective: 1000px;
+    }
 
-    /* ---- Toggle tabs ---- */
+    /* Grid pattern background - Notification page එකේ වගේමයි */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: radial-gradient(rgba(0,0,0,0.03) 1px, transparent 1px);
+      background-size: 32px 32px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container { width: 100%; max-width: 900px; margin: 0 auto; position: relative; z-index: 1; }
+
+    .back-link {
+      display: inline-flex; align-items: center; gap: 8px;
+      color: var(--ink3); text-decoration: none;
+      font-size: 14px; font-weight: 700;
+      margin-bottom: 40px; transition: color .2s;
+    }
+    .back-link:hover { color: var(--accent); }
+
+    .page-header { margin-bottom: 48px; text-align: left; }
+    /* ඔයා අහපු Heading style එක */
+    .page-header h1 {
+      font-family: 'Fraunces', serif;
+      font-size: 42px; font-weight: 900; letter-spacing: -1px;
+    }
+    .page-header h1 em { font-style: italic; font-weight: 300; color: var(--accent); }
+    .page-header p { color: var(--ink3); font-size: 16px; font-weight: 500; margin-top: 8px; }
+
+    /* ---- Tabs (Modern glass-morphism style) ---- */
     .view-toggle {
-      display: flex;
-      justify-content: center;
-      gap: 0;
-      margin-bottom: 28px;
+      display: flex; gap: 8px; margin-bottom: 40px;
+      background: var(--off2); padding: 6px; border-radius: 100px; width: fit-content;
     }
     .toggle-btn {
-      padding: 10px 32px;
-      border: 2px solid #3b82f6;
-      background: white;
-      color: #3b82f6;
-      font-weight: 600;
-      font-size: 14px;
-      cursor: pointer;
-      transition: 0.2s;
+      padding: 10px 24px; border: none; background: transparent;
+      color: var(--ink3); font-weight: 700; font-size: 14px;
+      cursor: pointer; border-radius: 100px; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .toggle-btn:first-child { border-radius: 8px 0 0 8px; border-right: 1px solid #3b82f6; }
-    .toggle-btn:last-child  { border-radius: 0 8px 8px 0; border-left: 1px solid #3b82f6; }
-    .toggle-btn.active { background: #3b82f6; color: white; }
-    .toggle-btn:hover:not(.active) { background: #eff6ff; }
+    .toggle-btn.active { background: var(--white); color: var(--ink); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
 
-    /* ---- Search bar ---- */
-    .search-wrap {
-      max-width: 560px;
-      margin: 0 auto 28px auto;
-      position: relative;
-    }
+    /* ---- Search (Notification styles පාවිච්චි කරලා) ---- */
+    .search-wrap { max-width: 100%; margin-bottom: 40px; position: relative; }
     .search-wrap input {
-      width: 100%;
-      padding: 14px 20px 14px 46px;
-      border-radius: 12px;
-      border: 1px solid #e2e8f0;
-      font-size: 15px;
-      outline: none;
-      transition: 0.3s;
-      background: white;
+      width: 100%; padding: 18px 24px 18px 52px; border-radius: var(--r);
+      border: 1px solid var(--border); background: var(--white);
+      font-family: inherit; font-size: 16px; outline: none;
+      transition: 0.3s; box-shadow: 0 4px 20px rgba(0,0,0,0.02);
     }
-    .search-wrap input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
-    .search-icon {
-      position: absolute;
-      left: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #94a3b8;
-      font-size: 18px;
-      pointer-events: none;
+    .search-wrap input:focus { border-color: var(--accent); box-shadow: 0 10px 30px rgba(255, 92, 53, 0.1); }
+    .search-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); opacity: 0.4; font-size: 20px; }
+
+    /* ---- 3D Interactive Cards ---- */
+    .grid { display: grid; gap: 20px; animation: slideUp 0.6s ease-out; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    .skill-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+    .people-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+
+    .card {
+      background: var(--white); border-radius: var(--r); padding: 24px;
+      border: 1px solid var(--border); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative; transform-style: preserve-3d;
+    }
+    .card:hover {
+      transform: translateZ(20px) scale(1.03);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.06);
+      border-color: var(--accent);
     }
 
-    /* ---- Skills grid ---- */
-    .skill-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 20px;
-      max-width: 1100px;
-      margin: auto;
-    }
-    .skill-card {
-      background: white;
-      padding: 24px 20px;
-      border-radius: 14px;
-      text-align: center;
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-      border: 1px solid #e2e8f0;
-      transition: 0.25s;
-    }
-    .skill-card:hover { transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
-    .skill-card h3 { margin: 0 0 14px 0; color: #0f172a; font-size: 16px; }
-    .btn-find {
-      background: #3b82f6;
-      color: white;
-      border: none;
-      padding: 10px 18px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-      width: 100%;
-      font-size: 14px;
-      transition: 0.2s;
-    }
-    .btn-find:hover { background: #2563eb; }
+    .card h3 { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 800; margin-bottom: 16px; }
 
-    /* ---- People grid ---- */
-    .people-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 20px;
-      max-width: 1100px;
-      margin: auto;
+    .btn-action {
+      background: var(--ink); color: white; border: none; padding: 14px;
+      border-radius: 14px; font-weight: 700; width: 100%; cursor: pointer;
+      transition: 0.2s; text-decoration: none; display: block; text-align: center; font-size: 14px;
     }
-    .people-card {
-      background: white;
-      padding: 24px 20px;
-      border-radius: 14px;
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-      border: 1px solid #e2e8f0;
-      transition: 0.25s;
-    }
-    .people-card:hover { transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+    .btn-action:hover { background: var(--accent); transform: translateY(-2px); }
 
-    .people-card-top {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      margin-bottom: 14px;
-    }
+    /* People Specific Card Styles */
+    .user-top { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
     .avatar {
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      color: white;
-      font-weight: 700;
-      flex-shrink: 0;
+      width: 52px; height: 52px; border-radius: 16px; background: var(--accent-soft);
+      display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 18px;
+      color: var(--accent); border: 1px solid rgba(255, 92, 53, 0.1);
+      transition: transform 0.3s ease;
+    }
+    .card:hover .avatar { transform: rotate(-5deg) scale(1.1); }
+
+    .user-info h3 { margin: 0; font-size: 18px; }
+    .user-info p { font-size: 14px; color: var(--ink3); line-height: 1.5; font-weight: 500; }
+
+    .pills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; }
+    .pill {
+      background: var(--bg); color: var(--ink2); padding: 6px 12px;
+      border-radius: 100px; font-size: 11px; font-weight: 700;
+      border: 1px solid var(--border);
     }
 
-    /* Clickable name */
-    .user-name-link {
-      font-size: 16px;
-      font-weight: 700;
-      color: #0f172a;
-      text-decoration: none;
-      border-bottom: 2px solid #3b82f6;
-      padding-bottom: 1px;
-      transition: 0.2s;
-      line-height: 1.3;
-      display: inline-block;
-    }
-    .user-name-link:hover { color: #3b82f6; }
-
-    .user-bio-preview {
-      font-size: 13px;
-      color: #64748b;
-      margin: 2px 0 0 0;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    /* Teach skill pills in people card */
-    .teach-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; min-height: 26px; }
-    .teach-pill {
-      background: #ecfdf5;
-      color: #065f46;
-      border: 1px solid #a7f3d0;
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-    }
-    .no-skills-label { font-size: 12px; color: #94a3b8; font-style: italic; }
-
-    .btn-view-profile {
-      width: 100%;
-      background: #f8fafc;
-      color: #3b82f6;
-      border: 1px solid #bfdbfe;
-      padding: 9px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 14px;
-      transition: 0.2s;
-      text-align: center;
-      text-decoration: none;
-      display: block;
-    }
-    .btn-view-profile:hover { background: #eff6ff; }
-
-    .empty-state { grid-column: 1/-1; text-align: center; padding: 50px; color: #64748b; background: white; border-radius: 14px; }
+    .empty-state { text-align: center; padding: 80px 24px; color: var(--ink3); grid-column: 1/-1; background: var(--white); border-radius: var(--r); }
   </style>
 </head>
 <body>
 
-<a href="../index.html" class="back-link">← Back to Dashboard</a>
+<div class="container">
+  <a href="../index.html" class="back-link">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+    Dashboard
+  </a>
 
-<div class="page-header">
-  <h2>🌍 Explore</h2>
-  <p>Discover skills and people in the SkillSwap community</p>
+  <div class="page-header">
+    <h1>Explore <em>Hub</em></h1>
+    <p>Discover expert skills and connect with the community</p>
+  </div>
+
+  <div class="view-toggle">
+    <button class="toggle-btn active" id="btn-skills" onclick="switchView('skills')">📚 Skills</button>
+    <button class="toggle-btn" id="btn-people" onclick="switchView('people')">👥 People</button>
+  </div>
+
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="explore-search" placeholder="Search skills..." oninput="onSearch()">
+  </div>
+
+  <div id="content-area"></div>
 </div>
-
-<!-- Skills / People toggle -->
-<div class="view-toggle">
-  <button class="toggle-btn active" id="btn-skills" onclick="switchView('skills')">📚 Skills</button>
-  <button class="toggle-btn" id="btn-people" onclick="switchView('people')">👥 People</button>
-</div>
-
-<!-- Search -->
-<div class="search-wrap">
-  <span class="search-icon">🔍</span>
-  <input type="text" id="explore-search" placeholder="Search..." oninput="onSearch()">
-</div>
-
-<!-- Content area -->
-<div id="content-area"></div>
 
 <script>
-  let currentView   = 'skills';
-  let allSkills     = [];
-  let allPeople     = [];  // { userId, userName, bio, teachSkills: [] }
+  let currentView = 'skills';
+  let allSkills = [];
+  let allPeople = [];
 
-  // ============================================================
-  // View switch
-  // ============================================================
   function switchView(view) {
     currentView = view;
-    $("#btn-skills, #btn-people").removeClass("active");
+    $(".toggle-btn").removeClass("active");
     $("#btn-" + view).addClass("active");
     $("#explore-search").val("");
-    $("#explore-search").attr("placeholder", view === 'skills' ? "Search skills..." : "Search people or skills...");
+    $("#explore-search").attr("placeholder", view === 'skills' ? "Search skills..." : "Search people...");
 
-    if (view === 'skills') {
-      renderSkills(allSkills);
-    } else {
-      if (allPeople.length === 0) loadPeople();
-      else renderPeople(allPeople);
-    }
+    if (view === 'skills') renderSkills(allSkills);
+    else { if (allPeople.length === 0) loadPeople(); else renderPeople(allPeople); }
   }
 
-  // ============================================================
-  // Search handler
-  // ============================================================
-  function onSearch() {
-    const kw = $("#explore-search").val().trim().toLowerCase();
-
-    if (currentView === 'skills') {
-      if (kw.length === 0) { renderSkills(allSkills); return; }
-      if (kw.length >= 2) {
-        $.ajax({
-          url: "http://localhost:8080/api/v1/skill/search?keyword=" + kw,
-          method: "GET",
-          headers: { "Authorization": "Bearer " + token },
-          success: function(res) { renderSkills(res.data || []); }
-        });
-      }
-    } else {
-      // Filter people locally by name or any teach skill
-      if (kw.length === 0) { renderPeople(allPeople); return; }
-      const filtered = allPeople.filter(p =>
-              p.userName.toLowerCase().includes(kw) ||
-              p.teachSkills.some(s => s.skillName.toLowerCase().includes(kw))
-      );
-      renderPeople(filtered);
-    }
-  }
-
-  // ============================================================
-  // Skills view
-  // ============================================================
   function loadSkills() {
     $.ajax({
       url: "http://localhost:8080/api/v1/skill/all",
       method: "GET",
       headers: { "Authorization": "Bearer " + token },
-      success: function(res) {
-        allSkills = res.data || [];
-        renderSkills(allSkills);
-      },
-      error: function(err) {
-        if (err.status === 401) window.location.replace("login.html");
-      }
+      success: function(res) { allSkills = res.data || []; renderSkills(allSkills); }
     });
   }
 
   function renderSkills(skills) {
-    const area = $("#content-area").empty();
-    const grid = $('<div class="skill-grid"></div>');
-
-    if (!skills || skills.length === 0) {
-      grid.append('<div class="empty-state">No skills found.</div>');
-    } else {
-      skills.forEach(s => {
-        grid.append(`
-          <div class="skill-card">
-            <h3>${s.skillName}</h3>
-            <button class="btn-find"
-              onclick="window.location.href='find-matches.html?skill=${s.id}'">
-              Find Partners
-            </button>
-          </div>
-        `);
-      });
-    }
-    area.append(grid);
+    const grid = $('<div class="grid skill-grid"></div>');
+    if (!skills.length) grid.append('<div class="empty-state">No skills found matching your search.</div>');
+    skills.forEach((s, i) => {
+      grid.append(`
+        <div class="card" style="animation-delay:${i*0.05}s">
+          <h3>${s.skillName}</h3>
+          <button class="btn-action" onclick="window.location.href='find-matches.html?skill=${s.id}'">Find Partners 🚀</button>
+        </div>`);
+    });
+    $("#content-area").html(grid);
   }
 
-  // ============================================================
-  // People view
-  // ============================================================
   function loadPeople() {
-    $("#content-area").html('<div style="text-align:center;padding:40px;color:#94a3b8;">Loading people...</div>');
-
-    // Get all users, then get their teach skills
+    $("#content-area").html('<div class="empty-state"><p>Syncing the community...</p></div>');
     $.ajax({
       url: "http://localhost:8080/api/v1/user/all",
       method: "GET",
       headers: { "Authorization": "Bearer " + token },
       success: function(res) {
         const users = (res.data || []).filter(u => String(u.id) !== String(loggedInUserId));
-
-        if (users.length === 0) {
-          renderPeople([]);
-          return;
-        }
-
-        // For each user fetch their teach skills
-        // Use Promise-style with $.ajax to collect all
         let loaded = 0;
         const people = [];
+        if(users.length === 0) { renderPeople([]); return; }
 
         users.forEach(u => {
           $.ajax({
             url: "http://localhost:8080/api/v1/user-skill/user/" + u.id,
             method: "GET",
             headers: { "Authorization": "Bearer " + token },
-            success: function(skillRes) {
-              const teachSkills = (skillRes.data || []).filter(s => s.type === 'TEACH');
-              people.push({
-                userId:      u.id,
-                userName:    u.name,
-                bio:         u.bio || "",
-                teachSkills: teachSkills
-              });
-            },
-            error: function() {
-              // Still add user even if skills fail
-              people.push({ userId: u.id, userName: u.name, bio: u.bio || "", teachSkills: [] });
+            success: function(sRes) {
+              people.push({ id: u.id, name: u.name, bio: u.bio || "SkillSwap Member", skills: (sRes.data || []).filter(s => s.type === 'TEACH') });
             },
             complete: function() {
-              loaded++;
-              if (loaded === users.length) {
-                // Sort by number of teach skills desc
-                people.sort((a, b) => b.teachSkills.length - a.teachSkills.length);
-                allPeople = people;
-                renderPeople(allPeople);
-              }
+              if (++loaded === users.length) { allPeople = people; renderPeople(allPeople); }
             }
           });
         });
-      },
-      error: function(err) {
-        if (err.status === 401) window.location.replace("login.html");
       }
     });
   }
 
   function renderPeople(people) {
-    const area = $("#content-area").empty();
-    const grid = $('<div class="people-grid"></div>');
+    const grid = $('<div class="grid people-grid"></div>');
+    if (!people.length) grid.append('<div class="empty-state">No people found matching your search.</div>');
 
-    if (!people || people.length === 0) {
-      grid.append('<div class="empty-state">No people found.</div>');
-      area.append(grid);
-      return;
-    }
-
-    people.forEach(p => {
-      // Avatar initials
-      const initials = p.userName
-              .split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
-
-      // Teach skills pills (max 4 shown)
-      let pillsHtml = '';
-      if (p.teachSkills.length === 0) {
-        pillsHtml = '<span class="no-skills-label">No teaching skills listed</span>';
-      } else {
-        const shown = p.teachSkills.slice(0, 4);
-        pillsHtml = shown.map(s => `<span class="teach-pill">${s.skillName}</span>`).join('');
-        if (p.teachSkills.length > 4) {
-          pillsHtml += `<span class="teach-pill" style="background:#f1f5f9;color:#64748b;border-color:#e2e8f0;">+${p.teachSkills.length - 4} more</span>`;
-        }
-      }
-
-      const bioText = p.bio ? p.bio : 'No bio provided.';
-
+    people.forEach((p, i) => {
+      const initials = p.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+      const skillHtml = p.skills.slice(0, 3).map(s => `<span class="pill">${s.skillName}</span>`).join('');
       grid.append(`
-        <div class="people-card">
-          <div class="people-card-top">
+        <div class="card" style="animation-delay:${i*0.05}s">
+          <div class="user-top">
             <div class="avatar">${initials}</div>
-            <div>
-              <a class="user-name-link"
-                 href="user-profile.html?userId=${p.userId}"
-                 title="View ${p.userName}'s profile">${p.userName}</a>
-              <p class="user-bio-preview">${bioText}</p>
+            <div class="user-info">
+              <h3>${p.name}</h3>
+              <p>${p.bio.substring(0, 45)}...</p>
             </div>
           </div>
-
-          <div class="teach-pills">${pillsHtml}</div>
-
-          <a class="btn-view-profile" href="user-profile.html?userId=${p.userId}">
-            View Full Profile →
-          </a>
-        </div>
-      `);
+          <div class="pills">${skillHtml}</div>
+          <a class="btn-action" href="user-profile.html?userId=${p.id}">View Profile →</a>
+        </div>`);
     });
-
-    area.append(grid);
+    $("#content-area").html(grid);
   }
 
-  // ============================================================
-  // Init
-  // ============================================================
-  $(document).ready(function() {
-    loadSkills();
-  });
+  function onSearch() {
+    const kw = $("#explore-search").val().toLowerCase();
+    if (currentView === 'skills') {
+      renderSkills(allSkills.filter(s => s.skillName.toLowerCase().includes(kw)));
+    } else {
+      renderPeople(allPeople.filter(p => p.name.toLowerCase().includes(kw) || p.skills.some(s => s.skillName.toLowerCase().includes(kw))));
+    }
+  }
+
+  $(document).ready(loadSkills);
 </script>
 </body>
 </html>

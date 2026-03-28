@@ -3,128 +3,316 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chat - SkillSwap Hub</title>
+  <title>Chat — SkillSwap Hub</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,700;0,900;1,300&family=Cabinet+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
   <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
   <script>
     const token = localStorage.getItem('token');
     const loggedInUserId = localStorage.getItem('userId');
-    if (!token || !loggedInUserId || loggedInUserId === "undefined") {
-      window.location.replace("login.html");
-    }
+    if (!token || !loggedInUserId || loggedInUserId === "undefined") window.location.replace("login.html");
     const urlParams = new URLSearchParams(window.location.search);
     let receiverId = urlParams.get('receiverId');
   </script>
   <style>
-    * { box-sizing: border-box; }
-    body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; color: #1e293b; margin: 0; display: flex; flex-direction: column; height: 100vh; }
-    .back-link { display: inline-block; text-decoration: none; color: #3b82f6; font-weight: 500; padding: 20px; font-size: 15px; }
-    .chat-wrapper { flex: 1; max-width: 800px; width: 100%; margin: 0 auto 20px auto; background: white; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.07); border: 1px solid #e2e8f0; display: flex; flex-direction: column; overflow: hidden; }
-    .chat-header { padding: 20px 32px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; gap: 15px; background: #fff; }
-    .avatar { width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #8b5cf6); display: flex; align-items: center; justify-content: center; font-size: 18px; color: white; font-weight: 700; }
-    .chat-header h2 { margin: 0; font-size: 1.2rem; color: #0f172a; }
-    .status-dot { width: 10px; height: 10px; background: #10b981; border-radius: 50%; margin-left: auto; }
-    #message-area { flex: 1; padding: 32px; overflow-y: auto; background: #f8fafc; display: flex; flex-direction: column; gap: 12px; }
-    .message { max-width: 70%; padding: 12px 18px; font-size: 15px; border-radius: 12px; }
-    .sent { align-self: flex-end; background: #3b82f6; color: white; border-bottom-right-radius: 2px; }
-    .received { align-self: flex-start; background: white; color: #1e293b; border: 1px solid #e2e8f0; border-bottom-left-radius: 2px; }
-    .chat-input-row { padding: 20px 32px; background: white; display: flex; gap: 12px; border-top: 1px solid #f1f5f9; }
-    #message-input { flex: 1; padding: 14px 18px; border-radius: 10px; border: 1px solid #e2e8f0; background: #f8fafc; outline: none; }
-    .btn-send { background: #3b82f6; color: white; border: none; padding: 0 24px; border-radius: 10px; font-weight: 600; cursor: pointer; }
+    :root {
+      --bg: #f7f6f2;
+      --white: #ffffff;
+      --off2: #eeecea;
+      --ink: #0e0d0b;
+      --ink2: #3d3b36;
+      --ink3: #8a8780;
+      --accent: #ff5c35;
+      --accent2: #ffb347;
+      --blue: #3b6ef8;
+      --green: #1cb87e;
+      --border: rgba(0,0,0,0.06);
+      --shadow: 0 10px 30px rgba(0,0,0,0.04);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Cabinet Grotesk', sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Subtle grid texture */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: radial-gradient(rgba(0,0,0,0.03) 1px, transparent 1px);
+      background-size: 32px 32px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Top Bar - Clean & Minimal */
+    .top-bar {
+      display: flex; align-items: center; gap: 16px;
+      padding: 16px 28px;
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      position: relative; z-index: 10;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.02);
+    }
+
+    .back-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 40px; height: 40px; border-radius: 14px;
+      background: var(--bg); border: 1px solid var(--border);
+      color: var(--ink2); text-decoration: none;
+      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .back-btn:hover { transform: translateX(-3px) scale(1.05); border-color: var(--accent); color: var(--accent); }
+
+    .chat-avatar {
+      width: 46px; height: 46px; border-radius: 15px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Fraunces', serif; font-size: 18px; font-weight: 900;
+      color: white; flex-shrink: 0;
+      box-shadow: 0 8px 20px rgba(255, 92, 53, 0.2);
+    }
+
+    .chat-header-info h2 { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 900; letter-spacing: -0.5px; }
+    .chat-status { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--green); font-weight: 700; }
+    .status-dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.5); opacity: 0.5; } }
+
+    /* Message Area */
+    #message-area {
+      flex: 1; padding: 30px 24px;
+      overflow-y: auto; display: flex;
+      flex-direction: column; gap: 14px;
+      position: relative; z-index: 1;
+      scroll-behavior: smooth;
+    }
+    #message-area::-webkit-scrollbar { width: 5px; }
+    #message-area::-webkit-scrollbar-thumb { background: var(--off2); border-radius: 10px; }
+
+    .message {
+      max-width: 72%; padding: 14px 20px;
+      font-size: 15px; font-weight: 500; line-height: 1.55;
+      position: relative;
+      animation: msgPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+      transform-origin: bottom;
+    }
+
+    @keyframes msgPop {
+      from { opacity: 0; transform: translateY(10px) scale(0.9); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .sent {
+      align-self: flex-end;
+      background: var(--white);
+      color: var(--ink);
+      border-radius: 20px 20px 4px 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+      border: 1px solid var(--border);
+    }
+
+    .received {
+      align-self: flex-start;
+      background: var(--accent);
+      color: white;
+      border-radius: 20px 20px 20px 4px;
+      box-shadow: 0 8px 25px rgba(255, 92, 53, 0.15);
+    }
+
+    .day-divider {
+      text-align: center; margin: 24px 0;
+      position: relative; display: flex; align-items: center;
+      justify-content: center;
+    }
+    .day-divider::before {
+      content: ''; position: absolute; width: 100%; height: 1px;
+      background: var(--border); z-index: 0;
+    }
+    .day-divider span {
+      background: var(--bg); padding: 0 16px;
+      font-size: 11px; font-weight: 800; color: var(--ink3);
+      text-transform: uppercase; letter-spacing: 1px; position: relative; z-index: 1;
+    }
+
+    /* Input Row - 3D Floating Effect */
+    .input-row {
+      padding: 24px 32px; background: transparent;
+      position: relative; z-index: 10;
+    }
+    .input-container {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 8px 10px 8px 24px;
+      display: flex; gap: 12px; align-items: center;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.06);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .input-container:focus-within {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+      border-color: rgba(255,92,53,0.2);
+    }
+
+    #message-input {
+      flex: 1; border: none; background: transparent;
+      padding: 10px 0; font-size: 15px; font-weight: 600;
+      color: var(--ink); outline: none; font-family: inherit;
+    }
+    #message-input::placeholder { color: var(--ink3); }
+
+    .btn-send {
+      width: 48px; height: 48px;
+      background: var(--accent); border: none;
+      border-radius: 50%; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 8px 15px rgba(255, 92, 53, 0.3);
+    }
+    .btn-send:hover { transform: scale(1.15) rotate(-10deg); background: var(--accent2); }
+    .btn-send svg { width: 20px; height: 20px; fill: white; margin-left: 2px; }
+
+    /* Connecting Bar */
+    .connecting-bar {
+      background: #fffbeb; color: #b45309;
+      padding: 8px; font-size: 12px; font-weight: 700;
+      text-align: center; border-bottom: 1px solid #fef3c7;
+    }
+    .spinner {
+      width: 12px; height: 12px; border: 2px solid rgba(180, 83, 9, 0.2);
+      border-top-color: #b45309; border-radius: 50%;
+      animation: spin 0.8s linear infinite; display: inline-block; margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
-<a href="javascript:history.back()" class="back-link">← Back</a>
-<div class="chat-wrapper">
-  <div class="chat-header">
-    <div class="avatar" id="receiver-avatar">?</div>
-    <div><h2 id="receiver-name">Loading...</h2><small style="color: #64748b;">Active Now</small></div>
-    <div class="status-dot"></div>
-  </div>
-  <div id="message-area"></div>
-  <div class="chat-input-row">
-    <input type="text" id="message-input" placeholder="Type your message...">
-    <button class="btn-send" id="send-btn">Send</button>
+
+<div id="connecting-bar" class="connecting-bar">
+  <span class="spinner"></span> Establishing secure connection…
+</div>
+
+<div class="top-bar">
+  <a href="javascript:history.back()" class="back-btn">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+  </a>
+  <div class="chat-avatar" id="receiver-avatar">?</div>
+  <div class="chat-header-info">
+    <h2 id="receiver-name">User</h2>
+    <div class="chat-status"><span class="status-dot"></span>Online</div>
   </div>
 </div>
+
+<div id="message-area"></div>
+
+<div class="input-row">
+  <div class="input-container">
+    <input type="text" id="message-input" placeholder="Write your message here..." autocomplete="off">
+    <button class="btn-send" id="send-btn">
+      <svg viewBox="0 0 24 24"><path d="M3.4 20.4l17.45-7.48a1 1 0 000-1.84L3.4 3.6a1 1 0 00-1.39 1.29L5.7 12l-3.69 7.11A1 1 0 003.4 20.4z"/></svg>
+    </button>
+  </div>
+</div>
+
 <script>
   let stompClient = null;
 
   function connect() {
     const socket = new SockJS('http://localhost:8080/ws');
     stompClient = Stomp.over(socket);
-    stompClient.connect({}, function (frame) {
-      stompClient.subscribe('/user/' + loggedInUserId + '/queue/messages', function (message) {
-        showMessage(JSON.parse(message.body).content, 'received');
+    stompClient.debug = null;
+    stompClient.connect({}, function() {
+      stompClient.subscribe('/user/' + loggedInUserId + '/queue/messages', function(message) {
+        const msg = JSON.parse(message.body);
+        if (String(msg.senderId) === String(receiverId)) {
+          showMessage(msg.content, 'received');
+        }
       });
+      $("#connecting-bar").slideUp(400);
+    }, function() {
+      $("#connecting-bar").text("⚠️ Live connection paused. Refresh to retry.").css('color','#dc2626');
     });
   }
 
-  // ✅ පරණ මැසේජ් ලෝඩ් කරන function එක
   function loadChatHistory() {
     $.ajax({
-      url: `http://localhost:8080/api/v1/chat/history/${loggedInUserId}/${receiverId}`,
+      url: "http://localhost:8080/api/v1/chat/history/" + loggedInUserId + "/" + receiverId,
       method: "GET",
       headers: { "Authorization": "Bearer " + token },
       success: function(res) {
-        if (res.data) {
-          $("#message-area").empty();
+        $("#message-area").empty();
+        if (res.data && res.data.length) {
           res.data.forEach(msg => {
-            // මැසේජ් එක එවපු කෙනා ලොග් වෙලා ඉන්න කෙනා නම් 'sent', නැත්නම් 'received'
-            const type = (msg.senderId == loggedInUserId) ? 'sent' : 'received';
+            const type = (String(msg.senderId) === String(loggedInUserId)) ? 'sent' : 'received';
             showMessage(msg.content, type);
           });
+        } else {
+          showDayDivider("Say hello to start the swap!");
         }
       },
-      error: function(err) {
-        console.error("History load failed:", err);
-      }
+      error: function() { showDayDivider("Conversation started"); }
     });
   }
 
   function sendMessage() {
     const content = $("#message-input").val().trim();
-    if (content && stompClient) {
-      // ✅ මෙතන senderId සහ receiverId එක අපි DTO එකට ගැලපෙන විදියට යවනවා
-      const chatMessage = {
-        senderId: parseInt(loggedInUserId),
-        receiverId: parseInt(receiverId),
-        content: content
-      };
-
-      stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
-      showMessage(content, 'sent');
-      $("#message-input").val("");
+    if (!content) return;
+    if (!stompClient || !stompClient.connected) {
+      alert("Wait a second, we're still connecting...");
+      return;
     }
+    const chatMessage = {
+      senderId: parseInt(loggedInUserId),
+      receiverId: parseInt(receiverId),
+      content: content
+    };
+    stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
+    showMessage(content, 'sent');
+    $("#message-input").val("").focus();
   }
 
   function showMessage(content, type) {
-    $("#message-area").append(`<div class="message ${type}">${content}</div>`);
+    const div = $(`<div class="message ${type}">${escapeHtml(content)}</div>`);
+    $("#message-area").append(div);
     const area = document.getElementById("message-area");
     area.scrollTop = area.scrollHeight;
   }
 
+  function showDayDivider(label) {
+    $("#message-area").append(`<div class="day-divider"><span>${label}</span></div>`);
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
   $(document).ready(function() {
     connect();
-
-    // ✅ පේජ් එක රෙඩි වූ ගමන් හිස්ට්‍රිය ලෝඩ් කරනවා
     if (receiverId) {
       loadChatHistory();
-
       $.ajax({
         url: "http://localhost:8080/api/v1/user/" + receiverId,
         method: "GET",
         headers: { "Authorization": "Bearer " + token },
         success: function(res) {
-          $("#receiver-name").text(res.data.name);
-          $("#receiver-avatar").text(res.data.name.charAt(0).toUpperCase());
+          const name = res.data.name || "Swapper";
+          $("#receiver-name").text(name);
+          const initials = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+          $("#receiver-avatar").text(initials);
         }
       });
     }
 
     $("#send-btn").click(sendMessage);
-    $('#message-input').keypress(function(e) { if(e.which == 13) sendMessage(); });
+    $("#message-input").keypress(function(e) { if (e.which === 13) sendMessage(); });
   });
 </script>
 </body>

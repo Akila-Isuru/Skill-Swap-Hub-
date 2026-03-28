@@ -16,6 +16,7 @@
     </script>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,700;0,900;1,300;1,700&family=Cabinet+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
 
     <style>
@@ -776,10 +777,32 @@
 
     // ---- Logout ----
     function logout() {
-        localStorage.clear();
-        window.location.replace("pages/login.html");
-    }
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You will be redirected to the landing page!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ff5c35',
+            cancelButtonColor: '#8a8780',
+            confirmButtonText: 'Yes, log me out!',
+            cancelButtonText: 'No, stay here',
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdrop: `rgba(14, 13, 11, 0.3)`,
 
+            showClass: {
+                popup: 'animate__animated animate__flipInX animate__fast'
+            },
+            hideClass: {
+                popup: 'animate__animated animate__flipOutX animate__fast'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+
+                localStorage.clear();
+                window.location.replace("pages/landing-page.html");
+            }
+        });
+    }
     // ---- Scroll reveal ----
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });

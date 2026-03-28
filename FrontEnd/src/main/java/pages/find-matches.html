@@ -2,265 +2,229 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Find Matches - SkillSwap Hub</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matches | SkillSwap Hub</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,700;0,900;1,300&family=Cabinet+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
+
     <script>
         const token = localStorage.getItem('token');
         const loggedInUserId = localStorage.getItem('userId');
-
-        if (!token || !loggedInUserId || loggedInUserId === "undefined") {
-            window.location.replace("login.html");
-        }
+        if (!token) window.location.replace("login.html");
     </script>
+
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; padding: 20px; }
-        .page-header { margin-bottom: 10px; }
-        .page-header h2 { margin: 0 0 6px 0; color: #1e293b; }
-        .page-header p  { margin: 0; color: #64748b; font-size: 14px; }
-
-        /* Mode badge shown when coming from explore */
-        .mode-badge {
-            display: inline-block;
-            background: #eff6ff;
-            color: #1d4ed8;
-            border: 1px solid #bfdbfe;
-            border-radius: 20px;
-            padding: 4px 14px;
-            font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 18px;
+        :root {
+            --bg: #f7f6f2;
+            --white: #ffffff;
+            --off2: #eeecea;
+            --ink: #0e0d0b;
+            --ink2: #3d3b36;
+            --ink3: #8a8780;
+            --accent: #ff5c35;
+            --accent-soft: rgba(255, 92, 53, 0.08);
+            --border: rgba(0,0,0,0.06);
+            --r: 20px;
         }
 
-        .match-card {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: 0.2s;
-            border: 1px solid #eef2f7;
-        }
-        .match-card:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.1); }
-        .user-info h3 { margin: 0 0 6px 0; color: #1e293b; font-size: 1.1rem; }
-        .user-info p  { margin: 6px 0 0 0; color: #64748b; font-size: 14px; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        .skill-tag {
-            background: #3b82f6;
-            color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 600;
-        }
-        .level-tag {
-            background: #f0fdf4;
-            color: #166534;
-            border: 1px solid #bbf7d0;
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-left: 8px;
+        body {
+            font-family: 'Cabinet Grotesk', sans-serif;
+            background: var(--bg);
+            color: var(--ink);
+            min-height: 100vh;
+            padding: 60px 24px;
+            perspective: 1000px;
         }
 
-        .btn-request {
-            background: #f59e0b;
-            color: white;
-            border: none;
-            padding: 12px 22px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.3s;
-            white-space: nowrap;
+        /* Subtle grid pattern background */
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background-image: radial-gradient(rgba(0,0,0,0.03) 1px, transparent 1px);
+            background-size: 32px 32px;
+            pointer-events: none;
+            z-index: 0;
         }
-        .btn-request:hover { background: #d97706; }
-        .btn-request:disabled { background: #94a3b8; cursor: not-allowed; }
+
+        .container { width: 100%; max-width: 650px; margin: 0 auto; position: relative; z-index: 1; }
 
         .back-link {
-            margin-bottom: 20px;
-            display: inline-block;
-            text-decoration: none;
-            color: #3b82f6;
-            font-weight: 500;
+            display: inline-flex; align-items: center; gap: 8px;
+            color: var(--ink3); text-decoration: none;
+            font-size: 14px; font-weight: 700;
+            margin-bottom: 40px; transition: color .2s;
         }
-        .no-matches {
-            text-align: center;
-            padding: 40px;
-            color: #64748b;
-            background: white;
-            border-radius: 12px;
-            border: 1px solid #eef2f7;
+        .back-link:hover { color: var(--accent); }
+
+        .header { margin-bottom: 40px; text-align: left; }
+        .header h1 {
+            font-family: 'Fraunces', serif;
+            font-size: 42px; font-weight: 900;
+            letter-spacing: -1.5px;
         }
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #94a3b8;
-            background: white;
-            border-radius: 12px;
+        .header h1 em { font-style: italic; font-weight: 300; color: var(--accent); }
+        .header p { color: var(--ink3); font-size: 16px; font-weight: 500; margin-top: 8px; }
+
+        .match-card {
+            background: var(--white); border-radius: var(--r); padding: 32px;
+            border: 1px solid var(--border); margin-bottom: 16px;
+            display: flex; justify-content: space-between; align-items: center;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d;
+            animation: revealIn .5s ease both;
         }
+
+        @keyframes revealIn {
+            from { opacity: 0; transform: translateY(20px) rotateX(-5deg); }
+            to { opacity: 1; transform: translateY(0) rotateX(0); }
+        }
+
+        .match-card:hover {
+            transform: translateZ(20px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.06);
+            border-color: var(--accent);
+        }
+
+        .user-info h3 {
+            font-family: 'Fraunces', serif;
+            font-size: 22px; font-weight: 800;
+            margin-bottom: 8px; color: var(--ink);
+        }
+
+        .skill-tag-wrap { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+        .skill-label { font-size: 13px; color: var(--ink3); font-weight: 600; }
+        .skill-badge {
+            background: var(--accent-soft); color: var(--accent); padding: 6px 14px;
+            border-radius: 100px; font-size: 12px; font-weight: 800;
+            border: 1px solid rgba(255, 92, 53, 0.1);
+        }
+
+        .btn-req {
+            background: var(--ink); color: white; border: none; padding: 14px 28px;
+            border-radius: 16px; font-weight: 700; cursor: pointer;
+            transition: all 0.3s; font-family: inherit; font-size: 14px;
+        }
+        .btn-req:hover { background: var(--accent); transform: translateY(-3px); box-shadow: 0 10px 20px rgba(255, 92, 53, 0.2); }
+        .btn-req:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+        .badge-mode {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: #fff4f2; color: var(--accent); padding: 8px 16px;
+            border-radius: 100px; font-size: 12px; font-weight: 800;
+            margin-bottom: 24px; border: 1px solid rgba(255, 92, 53, 0.1);
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+
+        .loader-box {
+            text-align: center; padding: 80px 24px;
+            background: var(--white); border-radius: var(--r);
+            border: 1px solid var(--border); color: var(--ink3);
+        }
+        .spinner {
+            width: 32px; height: 32px; border: 3px solid var(--off2);
+            border-top-color: var(--accent); border-radius: 50%;
+            animation: spin .8s linear infinite; margin: 0 auto 20px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-<a href="../index.html" class="back-link">← Back to Dashboard</a>
+<div class="container">
+    <a href="explore.html" class="back-link">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to Explore
+    </a>
 
-<div class="page-header">
-    <h2 id="page-title">Potential Skill Swappers</h2>
-    <p id="page-subtitle">ඔබ ඉගෙන ගැනීමට කැමති දේ ඉගැන්වීමට හැකි පුද්ගලයින් මෙහි දැක්වේ.</p>
+    <div id="mode-area"></div>
+
+    <div class="header">
+        <h1 id="title">Skill <em>Matches</em></h1>
+        <p>Connect with people who are experts in what you want to learn.</p>
+    </div>
+
+    <div id="match-list">
+        <div class="loader-box">
+            <div class="spinner"></div>
+            <p>Finding the perfect matches for you...</p>
+        </div>
+    </div>
 </div>
 
-<div id="mode-indicator"></div>
-<div id="matches-container"><div class="loading">Loading matches...</div></div>
-
 <script>
-    // ---- URL param check ----
-    // explore.html passes ?skill=89 when user clicks "Find Partners" for a specific skill.
-    // In that case we search by skillId directly.
-    // Without the param we fall back to the user's LEARN list (original behaviour).
-
-    const urlParams  = new URLSearchParams(window.location.search);
-    const skillIdParam = urlParams.get('skill');   // e.g. "89" or null
+    const urlParams = new URLSearchParams(window.location.search);
+    const skillId = urlParams.get('skill');
 
     function init() {
-        if (skillIdParam) {
-            // Mode: came from Explore — show everyone who can TEACH this skill
-            loadBySkill(parseInt(skillIdParam));
+        if (skillId) {
+            $("#mode-area").html('<div class="badge-mode"><span>✨</span> Specific Skill Search</div>');
+            loadBySkill(skillId);
         } else {
-            // Mode: normal Smart Match — use logged-in user's LEARN list
-            loadMatches();
+            loadSmartMatches();
         }
     }
 
-    // ---- Mode 1: skill-specific (from Explore) ----
-    function loadBySkill(skillId) {
+    function loadBySkill(id) {
         $.ajax({
-            url: "http://localhost:8080/api/v1/user-skill/by-skill/" + skillId,
+            url: "http://localhost:8080/api/v1/user-skill/by-skill/" + id,
             method: "GET",
             headers: { "Authorization": "Bearer " + token },
-            success: function(res) {
-                // Update header to show which skill we're browsing
-                const skillName = (res.data && res.data.length > 0) ? res.data[0].skillName : "this skill";
-                $("#page-title").text("People who can teach: " + skillName);
-                $("#page-subtitle").text("Send a swap request to learn from them!");
-                $("#mode-indicator").html(
-                    '<span class="mode-badge">🔍 Browsing from Explore: ' + skillName + '</span>'
-                );
-
-                renderMatches(res.data, skillId);
-            },
-            error: handleError
+            success: (res) => render(res.data)
         });
     }
 
-    // ---- Mode 2: LEARN-list based matching (original) ----
-    function loadMatches() {
+    function loadSmartMatches() {
         $.ajax({
             url: "http://localhost:8080/api/v1/user-skill/matches/" + loggedInUserId,
             method: "GET",
             headers: { "Authorization": "Bearer " + token },
-            success: function(res) {
-                renderMatches(res.data, null);
-            },
-            error: handleError
+            success: (res) => render(res.data)
         });
     }
 
-    // ---- Render ----
-    function renderMatches(data, overrideSkillId) {
-        const container = $("#matches-container").empty();
+    function render(data) {
+        const list = $("#match-list").empty();
+        const filtered = (data || []).filter(m => String(m.userId) !== String(loggedInUserId));
 
-        if (!data || data.length === 0) {
-            container.append(`
-                <div class="no-matches">
-                    <p style="font-size:2rem; margin-bottom:10px;">🤔</p>
-                    <p><strong>No matches found.</strong></p>
-                    <p style="margin-top:8px;">
-                        ${skillIdParam
-                ? 'Nobody is offering to teach this skill yet.'
-                : 'Try adding more skills to your <strong>\'Learn\'</strong> list in My Skills!'}
-                    </p>
-                </div>
-            `);
+        if (!filtered.length) {
+            list.html('<div class="loader-box"><p>No matches found for this skill yet. Try another one!</p></div>');
             return;
         }
 
-        data.forEach(m => {
-            // Filter out the logged-in user themselves
-            if (String(m.userId) === String(loggedInUserId)) return;
-
-            const levelTag = m.expertiseLevel
-                ? `<span class="level-tag">${m.expertiseLevel}</span>` : '';
-
-            container.append(`
-                <div class="match-card">
-                    <div class="user-info">
-                        <h3>${m.userName}</h3>
-                        <p>Can teach you:
-                            <span class="skill-tag">${m.skillName}</span>
-                            ${levelTag}
-                        </p>
-                    </div>
-                    <button class="btn-request"
-                        onclick="sendSwapRequest(${m.userId}, ${overrideSkillId || m.skillId}, '${m.skillName}', '${m.userName}')">
-                        Send Swap Request
-                    </button>
-                </div>
-            `);
+        filtered.forEach((m, i) => {
+            list.append(`
+        <div class="match-card" style="animation-delay:${i * 0.08}s">
+          <div class="user-info">
+            <h3>${m.userName}</h3>
+            <div class="skill-tag-wrap">
+              <span class="skill-label">Teaches:</span>
+              <span class="skill-badge">${m.skillName}</span>
+            </div>
+          </div>
+          <button class="btn-req" onclick="sendReq(this, ${m.userId}, ${m.skillId}, '${m.skillName}')">Swap Skills 🚀</button>
+        </div>`);
         });
-
-        // If all cards were filtered (only self), show no-matches
-        if (container.children().length === 0) {
-            container.append(`<div class="no-matches"><p>No other users found for this skill.</p></div>`);
-        }
     }
 
-    // ---- Send swap request ----
-    function sendSwapRequest(toUserId, skillId, skillName, toUserName) {
-        // Disable all buttons to avoid double-click
-        $(".btn-request").prop("disabled", true);
-
-        const requestData = {
-            senderId:   parseInt(loggedInUserId),
-            receiverId: parseInt(toUserId),
-            message:    "I want to swap skills with you for " + skillName,
-            status:     "PENDING"
-        };
+    function sendReq(btn, toId, sId, sName) {
+        const originalText = $(btn).text();
+        $(btn).prop('disabled', true).text('Sending...');
 
         $.ajax({
             url: "http://localhost:8080/api/v1/swap/send",
             method: "POST",
-            headers: {
-                "Authorization": "Bearer " + token,
-                "Content-Type": "application/json"
+            headers: { "Authorization": "Bearer " + token, "Content-Type": "application/json" },
+            data: JSON.stringify({ senderId: loggedInUserId, receiverId: toId, message: "Hi! I'd like to swap skills for: " + sName, status: "PENDING" }),
+            success: () => {
+                $(btn).text('Request Sent! ✅').css({'background': '#22c55e', 'box-shadow': 'none'});
             },
-            data: JSON.stringify(requestData),
-            success: function() {
-                alert(`✅ Swap request sent to ${toUserName} for '${skillName}'!`);
-                $(".btn-request").prop("disabled", false);
-            },
-            error: function(err) {
-                console.error("Swap request failed:", err);
-                alert("❌ Failed to send swap request. Please try again.");
-                $(".btn-request").prop("disabled", false);
+            error: () => {
+                alert("Failed to send request. Please try again.");
+                $(btn).prop('disabled', false).text(originalText);
             }
         });
-    }
-
-    // ---- Error handler ----
-    function handleError(err) {
-        if (err.status === 401) {
-            localStorage.clear();
-            window.location.replace("login.html");
-            return;
-        }
-        $("#matches-container").html(
-            '<div class="no-matches"><p>⚠️ Failed to load matches. Please try again.</p></div>'
-        );
-        console.error("Load failed:", err);
     }
 
     $(document).ready(init);
