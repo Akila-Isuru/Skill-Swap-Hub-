@@ -53,4 +53,4 @@ A full video demonstration of the project, including the user workflow and admin
 1.  **Clone the Repository:** Download the source code to your local machine.
 2.  **Database Configuration:** Set up a MySQL database and update the `application.properties` file with your credentials.
 3.  **Run Backend:** Execute the Spring Boot application using Maven or your preferred IDE.
-4.  **Launch Frontend:** Open `pages/login.html` to access the application.
+4.  **Launch Frontend:** Open `pages/landing.html` to access the application.
