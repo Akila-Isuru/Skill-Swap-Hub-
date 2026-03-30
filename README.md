@@ -36,7 +36,7 @@ A full video demonstration of the project, including the user workflow and admin
 * **Backend:** Java Spring Boot, Spring Security (JWT), Spring Data JPA.
 * **Frontend:** HTML5, CSS3, JavaScript (ES6+), jQuery.
 * **Database:** MySQL.
-* **Tools:** Maven, Leaflet.js (Maps integration), Git.
+* **Tools:** Maven, Git.
 
 ---
 
