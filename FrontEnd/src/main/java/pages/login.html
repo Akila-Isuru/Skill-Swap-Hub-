@@ -221,46 +221,43 @@
   const loginBtn = document.getElementById('loginBtn');
   const btnText = document.getElementById('btnText');
 
-  function loginUser() {
-    const email = $('#loginEmail').val().trim();
-    const password = $('#loginPassword').val().trim();
 
-    if (!email || !password) {
-      alert("Please fill in all fields");
-      return;
-    }
-
-    // Show loading state
-    loginBtn.disabled = true;
-    btnText.innerHTML = `<span class="spinner"></span> Signing in...`;
-
-    const authData = { email, password };
+    function loginUser() {
+    const authData = {
+    email: $('#loginEmail').val(),
+    password: $('#loginPassword').val()
+  };
 
     $.ajax({
-      url: "http://localhost:8080/api/v1/auth/login",
-      method: "POST",
-      contentType: "application/json",
-      data: JSON.stringify(authData),
-      success: function (res) {
-        if (res.code === 200) {
-          localStorage.setItem('token', res.data.access_token);
-          localStorage.setItem('userId', String(res.data.userId));
-          localStorage.setItem('userName', res.data.userName);
-          window.location.replace("../index.html");
-        }
-      },
-      error: function() {
-        alert("Invalid email or password. Please try again.");
-        // Reset button
-        resetButton();
-      },
-      complete: function() {
-        if (!document.getElementById('loginBtn').disabled) {
-          resetButton(); // In case of very fast response
-        }
-      }
-    });
+    url: "http://localhost:8080/api/v1/auth/login",
+    method: "POST",
+    contentType: "application/json",
+    data: JSON.stringify(authData),
+    success: function(res) {
+    if (res.code === 200) {
+    const data = res.data;
+
+    // Save all user info
+    localStorage.setItem('token',    data.access_token);
+    localStorage.setItem('userId',   String(data.userId));
+    localStorage.setItem('userName', data.userName);
+    localStorage.setItem('userRole', data.role || 'USER');  // <-- ADD THIS
+
+    // Role-based redirect
+    if (data.role === 'ADMIN') {
+    window.location.replace("admin-dashboard.html");
+  } else {
+    window.location.replace("../index.html");
   }
+  }
+  },
+    error: function(err) {
+    console.log("Login Error:", err);
+    alert("Invalid Credentials!");
+  }
+  });
+  }
+
 
   function resetButton() {
     loginBtn.disabled = false;

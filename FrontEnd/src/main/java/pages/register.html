@@ -230,14 +230,37 @@
   const registerBtn = document.getElementById('registerBtn');
   const regBtnText = document.getElementById('regBtnText');
 
+  function validateInput(name, email) {
+    // Regex for Email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (name.length < 3) {
+      alert("Name is too short. Please enter at least 3 characters.");
+      return false;
+    }
+
+    if (!emailRegex.test(email)) {
+      alert("Please enter a valid email address.");
+      return false;
+    }
+
+    return true;
+  }
+
   function registerUser() {
     const name = $('#name').val().trim();
     const email = $('#email').val().trim();
     const password = $('#password').val().trim();
     const bio = $('#bio').val().trim();
 
+    // Basic required check
     if (!name || !email || !password) {
       alert("Please fill in all required fields");
+      return;
+    }
+
+    // Perform Email & Name Validations
+    if (!validateInput(name, email)) {
       return;
     }
 
@@ -256,12 +279,15 @@
         alert("Account created successfully! Redirecting to sign in...");
         window.location.href = "login.html";
       },
-      error: function() {
-        alert("Registration failed. Please try again.");
+      error: function(xhr) {
+        const errorMsg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : "Registration failed. Please try again.";
+        alert(errorMsg);
         resetRegisterButton();
       },
       complete: function() {
-        resetRegisterButton();
+        if (!window.location.href.includes("login.html")) {
+          resetRegisterButton();
+        }
       }
     });
   }

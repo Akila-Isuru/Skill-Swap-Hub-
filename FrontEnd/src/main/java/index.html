@@ -7,11 +7,18 @@
 
     <script>
         (function() {
-            const token = localStorage.getItem('token');
+            const token  = localStorage.getItem('token');
             const userId = localStorage.getItem('userId');
+            const role   = localStorage.getItem('userRole');
+
+            // 1. ලොගින් වෙලා නැත්නම් ලොගින් පේජ් එකට යවන්න
             if (!token || token === "null" || !userId || userId === "null" || userId === "undefined") {
                 window.location.replace("pages/login.html");
+                return;
             }
+
+            // 2. මෙතන තිබ්බ 'if (role === "ADMIN")' එක අයින් කළා.
+            // එතකොට Admin ටත් index.html එකේ ඉන්න පුළුවන්.
         })();
     </script>
 

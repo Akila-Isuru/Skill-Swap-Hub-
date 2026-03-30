@@ -39,4 +39,9 @@ public class UserSkillController {
         List<UserSkillDTO> result = userSkillService.getUsersTeachingSkill(skillId);
         return ResponseEntity.ok(new APIResponse<>(200, "Success", result));
     }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<APIResponse<String>> deleteUserSkill(@PathVariable Long id) {
+        userSkillService.deleteUserSkill(id);
+        return new ResponseEntity<>(new APIResponse<>(200, "Skill removed successfully", null), HttpStatus.OK);
+    }
 }
